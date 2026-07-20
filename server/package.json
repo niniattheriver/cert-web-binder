@@ -22,7 +22,7 @@
     "express": "^4.22.2",
     "express-session": "^1.19.0",
     "multer": "^2.2.0",
-    "pdfjs-dist": "4.10.38",
+    "pdfjs-dist": "6.1.200",
     "zod": "^4.4.3"
   },
   "devDependencies": {
