@@ -23,7 +23,7 @@ jobs:
           - os: windows-2022
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           persist-credentials: false # 빌드 잡은 push 안 함 — 토큰을 .git/config에 남기지 않는다
 
