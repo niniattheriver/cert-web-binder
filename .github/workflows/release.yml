@@ -1,0 +1,80 @@
+# 릴리스 자동화 (v1.5 Phase 5 — 설계서 §7)
+# v* 태그 푸시(또는 수동 실행) 시 Linux·Windows 배포 zip을 만들어
+# GitHub Release 에 첨부한다. 산출물은 완전 오프라인 실행 가능(내부망 전제):
+# prod node_modules 폐쇄집합 + web 빌드 + pdf.js cMaps/폰트 동봉.
+name: release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+# 최소 권한 원칙: 빌드(package) 잡은 서드파티 npm 코드를 실행하므로 read만.
+# Release 생성이 필요한 publish 잡에만 잡 단위로 write 부여.
+permissions:
+  contents: read
+
+jobs:
+  package:
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-22.04 # Node 배포 목표(20/22 LTS)와 맞춘 안정 러너
+          - os: windows-2022
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false # 빌드 잡은 push 안 함 — 토큰을 .git/config에 남기지 않는다
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22 # 배포 목표 LTS (개발머신은 25 — CI는 목표 버전으로 검증)
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Version matches tag
+        # 태그 = package.json 버전 = zip 파일명 = /api/health 버전 (설계서 §7 버전 정책)
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          node -e "const v=require('./package.json').version, t=process.env.GITHUB_REF_NAME.replace(/^v/,''); if(v!==t){console.error('package.json '+v+' != tag '+t); process.exit(1)}"
+        env:
+          GITHUB_REF_NAME: ${{ github.ref_name }}
+
+      - name: Server tests
+        run: npm test -w server
+
+      - name: Build web
+        run: npm run build -w web
+
+      - name: Package release zip
+        run: npm run release -w server
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-${{ matrix.os }}
+          path: dist/*.zip
+          if-no-files-found: error
+
+  publish:
+    # 태그 푸시일 때만 GitHub Release 생성 (workflow_dispatch 는 아티팩트까지만)
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: package
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: write # Release 생성·아티팩트 첨부 (이 잡만)
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      - name: Create GitHub Release
+        # 서드파티 액션은 가변 태그 대신 감사된 커밋 SHA로 고정 (supply-chain)
+        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2
+        with:
+          files: artifacts/*.zip
+          generate_release_notes: true

@@ -1,0 +1,362 @@
+/*
+ * 인쇄 뷰 스타일 (설계서 §6.4, §4 #11) — 바인더 대체
+ * - 화면: 회색 배경 위 A4 폭 "종이" 미리보기 + [인쇄] 툴바.
+ * - 인쇄: @media print — @page 여백, break-inside:avoid, 고정 바닥글, 색상 강제 출력.
+ * 배지 계열 클래스(.badge, .badge-new/-mod/-recheck/-core/-required/-basic)는 전역 styles.css 재사용.
+ */
+
+.pr-root {
+  --pr-ink: #000000; /* 인쇄 본문 — 검정 */
+  --pr-dim: #55636a;
+  --pr-line: #cfc8ba;
+  --pr-line-strong: #b3aa98;
+  --pr-quote-bg: #f4f1ea;
+  background: #ece7dd; /* 화면 미리보기 배경(따뜻한 뉴트럴) */
+  min-height: 100vh;
+  color: var(--pr-ink);
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+/* ── 화면 툴바 (인쇄 시 숨김) ─────────────────────────── */
+.print-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 18px;
+  background: #ffffff;
+  border-bottom: 1px solid var(--pr-line);
+  box-shadow: 0 1px 3px rgba(16, 24, 40, 0.06);
+}
+.print-toolbar .pr-tb-title {
+  font-weight: 700;
+  font-size: 0.98rem;
+}
+.print-toolbar .pr-tb-spacer {
+  flex: 1;
+}
+.print-toolbar a.pr-tb-back {
+  color: var(--pr-dim);
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+.print-toolbar a.pr-tb-back:hover {
+  text-decoration: underline;
+}
+.print-toolbar .pr-tb-hint {
+  color: var(--pr-dim);
+  font-size: 0.82rem;
+}
+.pr-print-btn {
+  border: 1px solid var(--c-primary);
+  background: var(--c-primary);
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.9rem;
+  padding: 7px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.pr-print-btn:hover {
+  background: var(--c-primary-hover);
+}
+
+/* ── 종이(A4 폭) ─────────────────────────────────────── */
+.pr-paper {
+  width: 210mm;
+  max-width: calc(100% - 24px);
+  margin: 20px auto;
+  background: #fff;
+  border: 1px solid var(--pr-line);
+  box-shadow: 0 2px 12px rgba(16, 24, 40, 0.1);
+  padding: 18mm 15mm;
+  box-sizing: border-box;
+}
+
+/* ── 표지 ────────────────────────────────────────────── */
+.pr-cover {
+  min-height: 60vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 24px 8px;
+}
+.pr-cover-org {
+  color: var(--pr-dim);
+  font-size: 1rem;
+  letter-spacing: 0.02em;
+}
+.pr-cover-title {
+  margin: 6px 0 22px;
+  font-size: 1.7rem;
+  font-weight: 800;
+}
+.pr-cover-cat {
+  font-size: 2.1rem;
+  font-weight: 800;
+  border-top: 3px solid var(--pr-ink);
+  border-bottom: 3px solid var(--pr-ink);
+  padding: 16px 0;
+  margin-bottom: 26px;
+}
+.pr-cover-cat .pr-cover-code {
+  color: var(--pr-dim);
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-left: 8px;
+}
+.pr-cover-meta {
+  margin: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px 32px;
+  max-width: 520px;
+}
+.pr-cover-meta > div {
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px dotted var(--pr-line-strong);
+  padding-bottom: 6px;
+}
+.pr-cover-meta dt {
+  color: var(--pr-dim);
+}
+.pr-cover-meta dd {
+  margin: 0;
+  font-weight: 700;
+}
+
+/* ── 목차 ────────────────────────────────────────────── */
+.pr-toc,
+.pr-body {
+  padding-top: 6px;
+}
+.pr-h2 {
+  font-size: 1.25rem;
+  font-weight: 800;
+  margin: 4px 0 12px;
+  padding-bottom: 6px;
+  border-bottom: 2px solid var(--pr-ink);
+}
+.pr-toc-summary {
+  margin: 0 0 12px;
+  color: var(--pr-ink);
+  font-size: 0.95rem;
+}
+.pr-toc-summary b {
+  font-weight: 800;
+}
+.pr-toc-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+.pr-toc-table th,
+.pr-toc-table td {
+  text-align: left;
+  padding: 5px 8px;
+  border-bottom: 1px solid var(--pr-line);
+  vertical-align: top;
+}
+.pr-toc-table th {
+  color: var(--pr-dim);
+  font-weight: 700;
+  border-bottom: 1.5px solid var(--pr-line-strong);
+}
+.pr-toc-no {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.pr-toc-choice,
+.pr-toc-score {
+  white-space: nowrap;
+  text-align: right;
+}
+
+/* ── 문항 블록 ───────────────────────────────────────── */
+.pr-q {
+  border: 1px solid var(--pr-line);
+  border-radius: 8px;
+  padding: 14px 16px;
+  margin-bottom: 14px;
+}
+.pr-q-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+.pr-q-no {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.pr-q-num {
+  font-weight: 800;
+  font-size: 1.02rem;
+  font-variant-numeric: tabular-nums;
+}
+.pr-q-badges {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.pr-q-score {
+  color: var(--pr-dim);
+  font-weight: 700;
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+.pr-q-body {
+  margin: 0 0 10px;
+  font-size: 1rem;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.pr-grade {
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+  padding: 7px 10px;
+  background: #f6f8fa;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  margin-bottom: 10px;
+}
+.pr-grade b {
+  font-weight: 800;
+}
+.pr-grade .pr-na {
+  color: var(--pr-dim);
+}
+.pr-field {
+  margin-top: 10px;
+}
+.pr-h3 {
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: var(--pr-dim);
+  letter-spacing: 0.03em;
+  margin: 0 0 4px;
+  text-transform: none;
+}
+.pr-prose {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.pr-empty {
+  margin: 0;
+  color: var(--pr-dim);
+  font-style: italic;
+  font-size: 0.9rem;
+}
+
+/* ── 근거 목록 ───────────────────────────────────────── */
+.pr-evidence {
+  margin: 0;
+  padding-left: 20px;
+}
+.pr-ev {
+  margin-bottom: 9px;
+  break-inside: avoid;
+}
+.pr-ev:last-child {
+  margin-bottom: 0;
+}
+.pr-quote {
+  margin: 0 0 3px;
+  padding: 6px 12px;
+  background: var(--pr-quote-bg);
+  border-left: 3px solid var(--pr-line-strong);
+  border-radius: 0 4px 4px 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.pr-source {
+  color: var(--pr-dim);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+.pr-ev-rich .pr-source {
+  color: var(--pr-ink);
+}
+.pr-note {
+  color: var(--pr-dim);
+  font-size: 0.85rem;
+  margin-top: 2px;
+}
+
+/* ── 고정 바닥글 (인쇄 시 매 페이지 반복) ─────────────── */
+.pr-footer {
+  display: none;
+}
+
+/* ── 상태 화면 ───────────────────────────────────────── */
+.pr-status {
+  padding: 60px 20px;
+  text-align: center;
+  color: var(--pr-dim);
+}
+.pr-status.is-error {
+  color: #b91c1c;
+}
+
+/* ════════════════════════════════════════════════════════
+ * 인쇄 미디어
+ * ════════════════════════════════════════════════════════ */
+@page {
+  size: A4;
+  margin: 15mm 14mm 18mm;
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  .pr-root {
+    background: #fff;
+    font-size: 10.5pt;
+    /* 배지·인용문 배경색을 인쇄물에 강제 반영 */
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .pr-paper {
+    width: auto;
+    max-width: none;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    box-shadow: none;
+  }
+  .pr-cover {
+    min-height: 82vh;
+    break-after: page;
+  }
+  .pr-toc {
+    break-after: page;
+  }
+  .pr-q {
+    break-inside: avoid;
+  }
+  .pr-h2 {
+    break-after: avoid;
+  }
+  .pr-h3 {
+    break-after: avoid;
+  }
+  .pr-footer {
+    display: block;
+    position: fixed;
+    bottom: 4mm;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-size: 8.5pt;
+    color: #55606c;
+  }
+}

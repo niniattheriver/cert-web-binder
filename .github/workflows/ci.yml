@@ -1,0 +1,37 @@
+# PR·push 상시 검증 (외부 검토 반영)
+# 릴리스(release.yml)와 별도로, main 대상 push/PR 마다 타입검사·서버 테스트·웹 빌드를 돌린다.
+# E2E(Playwright)·Docker 빌드는 러너 시간·환경 의존이 커서 제외 — 릴리스 전 수동 검증 항목.
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22 # 배포 목표 LTS
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Typecheck (server + web)
+        run: npm run typecheck
+
+      - name: Server tests
+        run: npm test -w server
+
+      - name: Build web
+        run: npm run build -w web

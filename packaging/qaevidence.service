@@ -1,0 +1,37 @@
+# 인증 근거자료 웹 바인더 — systemd 유닛 (설계서 §7)
+# 설치:
+#   1) 릴리스 zip 을 /opt/qaevidence 에 펼친다 (server/ web/ node_modules/ package.json … 이 루트에).
+#   2) 사용자 생성:  sudo useradd --system --home /opt/qaevidence --shell /usr/sbin/nologin qaevidence
+#   3) 소유권:       sudo chown -R qaevidence:qaevidence /opt/qaevidence
+#   4) 이 파일 복사: sudo cp packaging/qaevidence.service /etc/systemd/system/
+#   5) 기동:         sudo systemctl daemon-reload && sudo systemctl enable --now qaevidence
+# 선행조건: 없음 — 릴리스 zip 동봉 런타임(runtime/node) 사용. 소스 구동 시에만 시스템 Node 필요.
+# 포트·데이터 경로는 /opt/qaevidence/config.json 에서 조정한다.
+
+[Unit]
+Description=인증 근거자료 웹 바인더 (QA Evidence Web Binder)
+Documentation=file:/opt/qaevidence/docs
+After=network.target
+
+[Service]
+Type=simple
+User=qaevidence
+Group=qaevidence
+WorkingDirectory=/opt/qaevidence
+Environment=NODE_ENV=production
+# node 경로가 다르면 수정: which node
+ExecStart=/opt/qaevidence/runtime/node --import tsx server/src/index.ts
+Restart=on-failure
+RestartSec=5
+# 크래시 반복 시 과도한 재시작 억제
+StartLimitIntervalSec=60
+StartLimitBurst=5
+
+# 보안 강화 (data/ 와 config.json 만 쓰기 허용)
+NoNewPrivileges=true
+ProtectSystem=full
+PrivateTmp=true
+ReadWritePaths=/opt/qaevidence/data /opt/qaevidence/config.json
+
+[Install]
+WantedBy=multi-user.target

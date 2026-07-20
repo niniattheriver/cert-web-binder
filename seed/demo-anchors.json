@@ -1,0 +1,162 @@
+{
+  "docs": [
+    {
+      "id": 1,
+      "code": "PRIV-지침",
+      "title": "가상기관 개인정보 처리지침",
+      "kind": "manual"
+    },
+    {
+      "id": 2,
+      "code": "SEC-지침",
+      "title": "가상기관 정보보안 운영지침",
+      "kind": "manual"
+    }
+  ],
+  "versions": [
+    {
+      "id": 1,
+      "document_id": 1,
+      "version_label": "2026-1",
+      "file_name": "가상지침서-개인정보처리지침.pdf"
+    },
+    {
+      "id": 2,
+      "document_id": 2,
+      "version_label": "2026-1",
+      "file_name": "가상지침서-정보보안운영지침.pdf"
+    }
+  ],
+  "passages": [
+    {
+      "id": 1,
+      "document_id": 1,
+      "label": "제12조 파기",
+      "color": "yellow"
+    },
+    {
+      "id": 2,
+      "document_id": 1,
+      "label": "제4조 보호책임자",
+      "color": "green"
+    },
+    {
+      "id": 3,
+      "document_id": 2,
+      "label": "제13조 백업",
+      "color": "blue"
+    },
+    {
+      "id": 4,
+      "document_id": 2,
+      "label": "제13조 백업",
+      "color": "blue"
+    }
+  ],
+  "anchors": [
+    {
+      "id": 1,
+      "passage_id": 1,
+      "document_version_id": 1,
+      "quote_exact": "제12조(개인정보의 파기)\n① 기관은 보유기간이 경과하거나 처리 목적이 달성된 개인정보를 지체 없이 파기한다.\n- 4 -\n② 전자적 파일 형태의 개인정보는 복구할 수 없는 방법으로 영구 삭제하고, 서면에 기록된\n개인정보는 파쇄 또는 소각의 방법으로 파기한다.\n③ 파기를 시행한 때에는 파기 일시, 파기 대상, 파기 방법을 파기대장에 기록하고 개인정보\n보호책임자의 확인을 받는다.",
+      "quote_prefix": " 쉬운 방법으로 하고, 통지 이력을 기록으로 남긴다.\n",
+      "quote_suffix": "\n제13조(정보주체의 권리 보장)\n① 정보주체는 기관이",
+      "start_offset": 1875,
+      "end_offset": 2086,
+      "page_start": 3,
+      "page_end": 4,
+      "rects_json": "[{\"page\":3,\"rects\":[[0.1,0.72,0.9,0.95]]},{\"page\":4,\"rects\":[[0.1,0.06,0.9,0.12]]}]",
+      "geometry_primary": 0,
+      "status": "resolved",
+      "method": "manual",
+      "confidence": null,
+      "resolved_by": 1,
+      "resolved_at": "2026-07-12T17:55:42.934Z"
+    },
+    {
+      "id": 2,
+      "passage_id": 2,
+      "document_version_id": 1,
+      "quote_exact": "제4조(개인정보 보호책임자)\n① 기관장은 개인정보 처리에 관한 업무를 총괄하여 책임질 개인정보 보호책임자를 지정한다.\n② 개인정보 보호책임자는 개인정보 보호계획의 수립과 시행, 처리 실태의 점검, 정보주체의 불만\n처리, 내부 교육 등의 업무를 수행한다.\n③ 기관은 개인정보 보호책임자의 성명과 연락처를 기관 홈페이지 등에 공개하여 정보주체가 쉽게\n확인할 수 있도록 한다.",
+      "quote_prefix": "적 형태로 처리되는\n개인정보에도 적용한다.\n- 2 -\n",
+      "quote_suffix": "\n제5조(개인정보의 수집·이용)\n① 기관은 업무 수행에",
+      "start_offset": 619,
+      "end_offset": 826,
+      "page_start": 2,
+      "page_end": 2,
+      "rects_json": "[{\"page\":2,\"rects\":[[0.1,0.2,0.9,0.24]]}]",
+      "geometry_primary": 0,
+      "status": "resolved",
+      "method": "manual",
+      "confidence": null,
+      "resolved_by": 1,
+      "resolved_at": "2026-07-12T17:55:42.940Z"
+    },
+    {
+      "id": 3,
+      "passage_id": 3,
+      "document_version_id": 2,
+      "quote_exact": "제13조(백업 및 복구)\n① 주요 정보시스템의 데이터는 백업 정책에 따라 주기적으로 백업한다.\n② 백업 매체는 원본과 물리적으로 분리된 안전한 장소에 보관한다.\n③ 백업 데이터의 복구 가능 여부를 반기별 1회 이상 시험하고 그 결과를 기록한다.",
+      "quote_prefix": "1회 이상 점검하고 이상 징후를 분석한다.\n- 4 -\n",
+      "quote_suffix": "\n제14조(암호 통제)\n① 중요 정보는 안전성이 검증된",
+      "start_offset": 1931,
+      "end_offset": 2067,
+      "page_start": 4,
+      "page_end": 4,
+      "rects_json": "[{\"page\":4,\"rects\":[[0.1,0.2,0.9,0.24]]}]",
+      "geometry_primary": 0,
+      "status": "resolved",
+      "method": "manual",
+      "confidence": null,
+      "resolved_by": 1,
+      "resolved_at": "2026-07-12T17:55:42.947Z"
+    },
+    {
+      "id": 4,
+      "passage_id": 4,
+      "document_version_id": 2,
+      "quote_exact": "제13조(백업 및 복구)\n① 주요 정보시스템의 데이터는 백업 정책에 따라 주기적으로 백업한다.\n② 백업 매체는 원본과 물리적으로 분리된 안전한 장소에 보관한다.\n③ 백업 데이터의 복구 가능 여부를 반기별 1회 이상 시험하고 그 결과를 기록한다.",
+      "quote_prefix": "1회 이상 점검하고 이상 징후를 분석한다.\n- 4 -\n",
+      "quote_suffix": "\n제14조(암호 통제)\n① 중요 정보는 안전성이 검증된",
+      "start_offset": 1931,
+      "end_offset": 2067,
+      "page_start": 4,
+      "page_end": 4,
+      "rects_json": "[{\"page\":4,\"rects\":[[0.1,0.2,0.9,0.24]]}]",
+      "geometry_primary": 0,
+      "status": "resolved",
+      "method": "manual",
+      "confidence": null,
+      "resolved_by": 1,
+      "resolved_at": "2026-07-12T18:00:10.444Z"
+    }
+  ],
+  "linksByPassage": {
+    "1": [
+      {
+        "questionNo": "50.030.010",
+        "note": "파기 절차·파기대장 근거",
+        "sort": 1
+      },
+      {
+        "questionNo": "50.030.020",
+        "note": null,
+        "sort": 1
+      }
+    ],
+    "2": [
+      {
+        "questionNo": "50.010.010",
+        "note": null,
+        "sort": 1
+      }
+    ],
+    "4": [
+      {
+        "questionNo": "60.060.010",
+        "note": null,
+        "sort": 1
+      }
+    ]
+  }
+}
