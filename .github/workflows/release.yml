@@ -27,7 +27,7 @@ jobs:
         with:
           persist-credentials: false # 빌드 잡은 push 안 함 — 토큰을 .git/config에 남기지 않는다
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: 22 # 배포 목표 LTS (개발머신은 25 — CI는 목표 버전으로 검증)
           cache: npm
