@@ -1,0 +1,42 @@
+{
+  "name": "server",
+  "version": "1.5.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "start": "tsx src/index.ts",
+    "test": "vitest run --passWithNoTests",
+    "typecheck": "tsc --noEmit",
+    "build": "tsc --noEmit",
+    "release": "node ../packaging/release.mjs",
+    "parse:pdf": "tsx src/pdf/cli-parse.ts",
+    "golden": "tsx src/import/golden-runner.ts",
+    "reingest": "tsx src/import/reingest-cli.ts"
+  },
+  "dependencies": {
+    "approx-string-match": "^2.0.0",
+    "bcryptjs": "^3.0.3",
+    "better-sqlite3": "^12.11.1",
+    "exceljs": "^4.4.0",
+    "express": "^4.22.2",
+    "express-session": "^1.19.0",
+    "multer": "^2.2.0",
+    "pdfjs-dist": "4.10.38",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/express": "^4.17.25",
+    "@types/express-session": "^1.19.0",
+    "@types/multer": "^2.2.0",
+    "@types/node": "^26.1.1",
+    "tsx": "^4.23.0",
+    "typescript": "^7.0.2",
+    "vitest": "^4.1.10"
+  },
+  "engines": {
+    "node": ">=20.19 <21 || >=22.12"
+  }
+}
