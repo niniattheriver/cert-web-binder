@@ -1,0 +1,20 @@
+# 실데이터·로컬자료는 이미지에 절대 유입 금지 (공개 저장소·내부망 원칙 — 설계서 §0 R2)
+_로컬자료/
+data/
+data.bak*/
+
+# 빌드 산출물·의존성 (이미지 안에서 재생성)
+node_modules/
+dist/
+build/
+**/dist/
+web/public/pdfjs/
+web/public/spike/
+
+# 로컬 환경·잡동사니
+.git/
+config.json
+*.log
+.DS_Store
+e2e/
+test-results/

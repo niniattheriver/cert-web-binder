@@ -1,0 +1,24 @@
+{
+  "name": "cert-web-binder",
+  "version": "1.5.3",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "server",
+    "web"
+  ],
+  "scripts": {
+    "dev": "concurrently -k -n server,web -c blue,green \"npm run dev -w server\" \"npm run dev -w web\"",
+    "build": "npm run build -w web",
+    "test": "npm run test -w server",
+    "typecheck": "npm run typecheck -w server && npm run typecheck -w web",
+    "seed:demo": "tsx seed/seed-demo.ts"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.61.1",
+    "concurrently": "^10.0.3"
+  },
+  "engines": {
+    "node": ">=20.19 <21 || >=22.12"
+  }
+}
