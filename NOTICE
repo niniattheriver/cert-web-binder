@@ -1,0 +1,52 @@
+인증 근거자료 웹 바인더 (Cert Web Binder)
+Copyright (c) 2026 인증 근거자료 웹 바인더 기여자
+
+이 제품은 MIT License(LICENSE 파일)로 배포됩니다.
+아래는 이 소프트웨어가 사용하는 서드파티 구성요소와 그 라이선스입니다.
+모두 permissive 라이선스(MIT · Apache-2.0 · BSD-3-Clause · SIL OFL 1.1)이며,
+copyleft(GPL/LGPL/AGPL) 또는 상용 라이선스 의존성은 포함하지 않습니다.
+(설계서 §1 의존성 정책: 금지 목록 xlsx/PyMuPDF/CKEditor5 등 미사용.)
+
+───────────────────────────────────────────────────────────────────────────
+런타임 의존성 (server)
+───────────────────────────────────────────────────────────────────────────
+  approx-string-match            2.x     MIT           근사 문자열 매칭(재앵커)
+  bcryptjs                       3.x     BSD-3-Clause   비밀번호 해시
+  better-sqlite3                 12.x    MIT            SQLite 드라이버(동기)
+  exceljs                        4.x     MIT            엑셀(.xlsx) 생성
+  express                        4.x     MIT            HTTP 서버
+  express-session                1.x     MIT            세션
+  multer                         2.x     MIT            멀티파트 업로드
+  pdfjs-dist                     4.x     Apache-2.0     PDF 추출·렌더(서버·클라이언트 공용 엔진)
+  zod                            4.x     MIT            입력 검증
+
+───────────────────────────────────────────────────────────────────────────
+런타임 의존성 (web)
+───────────────────────────────────────────────────────────────────────────
+  react, react-dom               18.x    MIT            UI 프레임워크
+  react-router-dom               7.x     MIT            라우팅
+  @tanstack/react-virtual        3.x     MIT            대용량 목록 가상화
+  @tiptap/react · starter-kit · pm · extension-*  3.x  MIT   자유형식 근거문서 편집기
+  pdfjs-dist                     4.x     Apache-2.0     PDF 뷰어
+  react-pdf-highlighter-extended 8.x     MIT            PDF 하이라이트 오버레이
+
+───────────────────────────────────────────────────────────────────────────
+빌드·개발·테스트 도구 (배포물 미포함 또는 런타임 아님)
+───────────────────────────────────────────────────────────────────────────
+  typescript                     7.x     Apache-2.0
+  vite                           8.x     MIT            web 번들러
+  tsx                            4.x     MIT            TS 실행기(서버 런타임 포함)
+  vitest                         4.x     MIT            서버 단위 테스트
+  @playwright/test               1.x     Apache-2.0     E2E 테스트
+  concurrently                   10.x    MIT            개발 동시 실행
+
+───────────────────────────────────────────────────────────────────────────
+폰트 · 데모 자산
+───────────────────────────────────────────────────────────────────────────
+  Noto Sans KR (Regular/Bold)            SIL OFL 1.1    seed/fonts/ · 데모 PDF 생성 시에만 사용
+                                                         (서브셋만 데모 PDF에 임베드).
+                                                         원문 라이선스: seed/fonts/OFL.txt
+  seed/demo-pdfs/*.pdf                   자체 제작(무저작권)  가상 기관·문항·지침서. 실존 저작물 무관.
+
+각 구성요소의 전체 라이선스 전문은 배포물의 node_modules/<패키지>/ 하위
+LICENSE 파일 및 각 프로젝트 저장소를 참조하세요.

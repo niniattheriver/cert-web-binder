@@ -1,0 +1,52 @@
+# ===== 실데이터 — 어떤 커밋에도 포함 금지 (공개 저장소 예정) =====
+_로컬자료/
+data/
+data.bak*/
+
+# 로컬 기획·검토 자료 (스크린샷에 실물 문항 본문 포함 — 공개 금지)
+.obsidian/
+image/
+Pasted image *.png
+# 날짜 접두 작업노트 (예: 2026-07-13_수정할_것.md, 2026-07-14_nininotes.md) — 코드 아님, 공개 제외
+/2026-*.md
+
+# 외부 검토 요청 패킷 (내부 로드맵 — 공개 저장소 제외)
+외부검토_요청/
+
+# 의존성·빌드 산출물
+node_modules/
+dist/
+build/
+*.tsbuildinfo
+
+# 로컬 환경
+.env
+.env.*
+*.local
+config.json
+
+# pdf.js 정적 자산 (copy-pdf-assets.mjs가 node_modules에서 복사 — 커밋 불필요)
+web/public/pdfjs/
+.DS_Store
+Thumbs.db
+
+# 로그·임시
+*.log
+tmp/
+
+# 공모전 지원서 (개인정보 포함 — 공개 저장소 제외)
+2026_임상검사실_업무자동화_공모전_지원서*.docx
+~$*.docx
+# 시연 영상 (별도 제출물 — 저장소 제외)
+웹바인더_시연영상*.mp4
+
+# AI 어시스턴트 설정·개발용 메모 (공개 저장소 제외 — 제품 사용과 무관)
+CLAUDE.md
+킥오프-프롬프트.md
+e2e/.screenshots/
+cert-web-binder-*-src.zip
+test-results/
+
+# 외부 검토 문서 (비공개 수신 자료)
+USER_ACCEPTANCE_REVIEW_*.md
+DEVELOPER_REVIEW_*.md

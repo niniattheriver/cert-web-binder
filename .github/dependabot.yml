@@ -1,0 +1,15 @@
+# 의존성 취약점 감시 (외부 검토 반영)
+# open-pull-requests-limit: 0 — 통상 판올림 PR은 만들지 않고(안정 우선),
+# 보안 취약점 대응 PR(Dependabot security updates)만 받는다.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: "/"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 0
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 0
