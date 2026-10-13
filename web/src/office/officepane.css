@@ -1,0 +1,84 @@
+/* Office 판본 뷰어 페인: OfficeViewerPane.tsx
+   바깥 틀, 매핑 테두리와 안내줄, 툴바, 팝오버, 배지, 하이라이트 조각, 토스트는 styles.css 의 pvp-* 규칙을
+   그대로 쓴다(PDF 뷰어와 같은 모양). 여기서는 스크롤 상자, 좌표 기준 상자, 확대 상자, 하이라이트 층,
+   검색 표시, 매핑 모드 선택색만 정한다. 색은 styles.css :root 의 색 토큰만 쓴다(어두운 바탕 금지). */
+
+/* 스크롤 상자: 페인을 꽉 채운다 (PDF 뷰어의 .PdfHighlighter 자리) */
+.ovp-scroll {
+  position: absolute;
+  inset: 0;
+  overflow: auto;
+  background: var(--panel);
+  scrollbar-color: var(--rule) var(--panel);
+}
+/* 흐름 문서: 세로 스크롤 막대 자리를 늘 비워 둔다. 폭에 맞춘 확대율이 막대가 생기고 없어질 때마다 바뀌면
+   확대율이 넘침을 없애고 다시 만드는 고리를 돈다(고전 스크롤 막대를 쓰는 Windows) */
+.ovp-scroll.ovp-kind-flow {
+  scrollbar-gutter: stable;
+}
+
+/* 좌표 기준 상자: 하이라이트 층의 원점. 렌더러 뿌리가 페인 높이를 채울 수 있게 세로 flex */
+.ovp-content {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+
+/* 확대 상자: 흐름 문서가 페인보다 넓을 때 인라인 style 의 zoom 으로 폭에 맞춘다 */
+.ovp-zoom {
+  display: flex;
+  flex-direction: column;
+  flex: 1 0 auto;
+  min-width: 0;
+}
+.ovp-zoom > * {
+  flex: 1 0 auto;
+}
+
+/* 시트는 렌더러가 페인 높이 안에서 스스로 스크롤한다 */
+.ovp-content.ovp-kind-sheet {
+  height: 100%;
+}
+.ovp-content.ovp-kind-sheet > .ovp-zoom {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+.ovp-content.ovp-kind-sheet > .ovp-zoom > * {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+/* 하이라이트 층: 크기 0 상자에서 조각을 절대 위치로 그린다. z-index 를 주지 않아 쌓임 맥락을 만들지 않으므로
+   조각의 mix-blend-mode: multiply 가 아래 글자, 종이와 섞인다(PDF 뷰어처럼 글자가 비친다). */
+.ovp-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+.ovp-overlay .pvp-part,
+.ovp-overlay .pvp-badge {
+  pointer-events: auto;
+}
+/* 매핑 모드: 하이라이트 위에서도 드래그 선택이 되도록 조각은 통과 (배지는 PDF 뷰어처럼 눌린다) */
+.pvp-root.is-map .ovp-overlay .pvp-part {
+  pointer-events: none;
+}
+
+/* 처음 열 때의 검색어 자리: 노랑, 배지 없음, 클릭 통과 */
+.ovp-search {
+  position: absolute;
+  z-index: 3;
+  background: rgba(255, 213, 46, 0.5); /* --y-chip */
+  mix-blend-mode: multiply;
+  border-radius: 2px;
+  pointer-events: none;
+}
+
+/* 매핑 모드 선택색: PDF 뷰어의 textSelectionColor 와 같은 값 (--y-chip 45%) */
+.ovp-root.is-map ::selection {
+  background: rgba(255, 213, 46, 0.45);
+}

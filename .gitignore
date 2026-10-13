@@ -1,0 +1,47 @@
+# ===== 실데이터 — 어떤 커밋에도 포함 금지 (공개 저장소 예정) =====
+_로컬자료/
+data/
+data.bak*/
+
+# 로컬 메모와 스크린샷 (실물 문항 본문 포함, 공개 금지)
+.obsidian/
+image/
+Pasted image *.png
+# 날짜 접두 작업 메모 (예: 2026-07-13_메모.md): 코드 아님, 공개 제외
+/2026-*.md
+
+# 의존성·빌드 산출물
+node_modules/
+dist/
+build/
+*.tsbuildinfo
+
+# 로컬 환경
+.env
+.env.*
+*.local
+config.json
+config.json.*.tmp
+
+# pdf.js 정적 자산 (copy-pdf-assets.mjs가 node_modules에서 복사 — 커밋 불필요)
+web/public/pdfjs/
+.DS_Store
+Thumbs.db
+
+# 로그·임시
+*.log
+tmp/
+
+# 공모전 지원서 (개인정보 포함 — 공개 저장소 제외)
+2026_임상검사실_업무자동화_공모전_지원서*.docx
+~$*.docx
+# 시연 영상 (별도 제출물 — 저장소 제외)
+웹바인더_시연영상*.mp4
+
+# 시험 산출물, 소스 묶음
+e2e/.screenshots/
+cert-web-binder-*-src.zip
+test-results/
+
+# 시연 영상 (로컬 자료 — 공개 저장소 커밋 대상 아님)
+*.mp4

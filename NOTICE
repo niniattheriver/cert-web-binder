@@ -1,0 +1,71 @@
+인증 근거자료 웹 바인더 (Cert Web Binder)
+Copyright (c) 2026 인증 근거자료 웹 바인더 기여자
+
+이 제품은 MIT License(LICENSE 파일)로 배포됩니다.
+아래는 이 소프트웨어가 사용하는 서드파티 구성요소와 그 라이선스입니다.
+배포물에 들어가는 구성요소는 모두 permissive 라이선스(MIT, Apache-2.0, BSD, ISC, SIL OFL 1.1 등)이며,
+copyleft(GPL/LGPL/AGPL) 또는 상용 라이선스 의존성은 포함하지 않습니다.
+(설계서 §1 의존성 정책: 금지 목록 xlsx/PyMuPDF/CKEditor5 등 미사용.)
+
+───────────────────────────────────────────────────────────────────────────
+런타임 의존성 (server)
+───────────────────────────────────────────────────────────────────────────
+  approx-string-match            2.x     MIT           근사 문자열 매칭(재앵커)
+  bcryptjs                       3.x     BSD-3-Clause   비밀번호 해시
+  better-sqlite3                 12.x    MIT            SQLite 드라이버(동기)
+  exceljs                        4.x     MIT            엑셀(.xlsx) 생성과 읽기
+  express                        4.x     MIT            HTTP 서버
+  express-session                1.x     MIT            세션
+  multer                         2.x     MIT            멀티파트 업로드
+  pdfjs-dist                     4.x     Apache-2.0     PDF 추출·렌더(서버·클라이언트 공용 엔진)
+  zod                            4.x     MIT            입력 검증
+  tsx (esbuild 포함)             4.x     MIT            TS 실행기(배포물의 서버를 이것으로 실행)
+  Node.js 실행 파일              22.x    MIT 등         runtime/ 에 동봉한 실행 엔진. 라이선스 전문: runtime/NODE_LICENSE.txt
+
+───────────────────────────────────────────────────────────────────────────
+런타임 의존성 (web)
+───────────────────────────────────────────────────────────────────────────
+  react, react-dom               18.x    MIT            UI 프레임워크
+  react-router-dom               7.x     MIT            라우팅
+  @tanstack/react-virtual        3.x     MIT            대용량 목록 가상화
+  @tiptap/react · starter-kit · pm · extension-*  3.x  MIT   자유형식 근거문서 편집기
+  pdfjs-dist                     4.x     Apache-2.0     PDF 뷰어
+  react-pdf-highlighter-extended 8.x     MIT            PDF 하이라이트 오버레이
+  diff                           9.x     BSD-3-Clause   판본 비교(줄 단위 차이)
+
+───────────────────────────────────────────────────────────────────────────
+빌드·개발·테스트 도구 (배포물 미포함 또는 런타임 아님)
+───────────────────────────────────────────────────────────────────────────
+  typescript                     7.x     Apache-2.0
+  vite                           8.x     MIT            web 번들러
+  @vitejs/plugin-react           6.x     MIT            web 빌드(React 변환)
+  lightningcss                   1.x     MPL-2.0        CSS 처리(vite 가 씀, 배포물 미포함)
+  pdfkit                         0.17.x  MIT            데모 PDF 생성(seed/pdf-gen, 독립 패키지)
+  vitest                         4.x     MIT            서버 단위 테스트
+  @playwright/test               1.x     Apache-2.0     E2E 테스트
+  concurrently                   10.x    MIT            개발 동시 실행
+
+───────────────────────────────────────────────────────────────────────────
+폰트 · 데모 자산
+───────────────────────────────────────────────────────────────────────────
+  Noto Sans KR (Regular/Bold)            SIL OFL 1.1    seed/fonts/ · 데모 PDF 생성 시에만 사용
+                                                         (서브셋만 데모 PDF에 임베드).
+                                                         원문 라이선스: seed/fonts/OFL.txt
+  Pretendard Variable                    SIL OFL 1.1    web/public/fonts/, 앱 화면 글꼴.
+                                                         글꼴 파일을 앱과 함께 배포하므로 외부 CDN 없이
+                                                         어느 PC에서나 같은 글꼴로 보인다.
+                                                         원문 라이선스: web/public/fonts/LICENSE-Pretendard.txt
+  seed/demo-pdfs/*.pdf                   자체 제작(무저작권)  가상 기관·문항·지침서. 실존 저작물 무관.
+
+───────────────────────────────────────────────────────────────────────────
+문서 형식 공개 문서 (구형 형식 자체 구현의 참고 자료. 코드나 문서 본문은 포함하지 않음)
+───────────────────────────────────────────────────────────────────────────
+  본 제품은 한컴의 HWP 문서 파일(.hwp) 공개 문서를 참고하여 개발하였습니다.
+    한컴 'HWP·OWPML 문서 형식 공개' 페이지의 이용 조건에 따라 제품 화면(근거자료 라이브러리 아래),
+    도움말(사용 안내 끝), 설명서(README, 이 파일, docs/INSTALL.md), 소스 코드(server/src/office/legacy/hwp.ts)에
+    이 문구를 둔다. 배포 zip 에도 README, NOTICE, LICENSE 를 함께 담는다.
+  구형 Word(doc), Excel(xls)과 OLE 복합 문서는 Microsoft 공개 사양을 참고했다:
+    [MS-DOC], [MS-XLS], [MS-CFB], [MS-OLEPS], [MS-OSHARED].
+
+server 의존성의 라이선스 전문은 배포물의 node_modules/<패키지>/ 하위 LICENSE 파일에, web 의존성(web/dist 에
+번들로 들어감)의 라이선스 전문은 배포물의 THIRD_PARTY_LICENSES.txt 에 있습니다.
