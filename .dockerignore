@@ -1,0 +1,23 @@
+# 기본은 모두 빼고, 이미지를 만드는 데 필요한 것만 넣는다.
+# 저장소 폴더에는 Git 에서 뺀 로컬 파일(메모, 스크린샷, 환경 파일, 실데이터 data/, _로컬자료/)이 있을 수 있다.
+# 빼는 목록을 하나씩 쌓으면 새로 생긴 로컬 파일이 빠지므로, 넣는 목록을 적는다. Dockerfile 도 이 안에서 필요한 경로만 복사한다.
+*
+!package.json
+!package-lock.json
+!server/
+!web/
+!README.md
+!NOTICE
+!LICENSE
+
+# 넣은 폴더 안에서도 뺀다: 의존성, 빌드 산출물(이미지 안에서 다시 만든다), 시험 파일, 로그, 환경 파일
+**/node_modules
+**/dist
+web/public/pdfjs
+web/public/spike
+server/**/*.test.ts
+**/*.log
+**/.env
+**/.env.*
+**/.DS_Store
+**/Thumbs.db

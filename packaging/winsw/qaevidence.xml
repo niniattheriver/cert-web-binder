@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  인증 근거자료 웹 바인더 — Windows 서비스 정의 (WinSW, 설계서 §7)
+  배치: 이 파일과 WinSW 실행파일(qaevidence-service.exe)을 설치 루트(예: C:\qaevidence)에 둔다.
+        %BASE% = 실행파일이 있는 폴더 = 설치 루트.
+  설치:  qaevidence-service.exe install
+  시작:  qaevidence-service.exe start   (또는 서비스 관리자에서 시작)
+  로그:  설치 루트에 qaevidence-service.out.log / .err.log
+  선행조건: 없음 — 릴리스 zip 에 실행 엔진(runtime\node.exe)이 동봉된다.
+        (소스에서 직접 구동하는 예외 상황이면 executable 을 node 로 바꾸고 PATH 에 Node 필요)
+-->
+<service>
+  <id>qaevidence</id>
+  <name>인증 근거자료 웹 바인더</name>
+  <description>인증 문항 근거자료 관리 웹 바인더 (QA Evidence Web Binder)</description>
+
+  <executable>%BASE%\runtime\node.exe</executable>
+  <arguments>--import tsx server\src\index.ts</arguments>
+  <workingdirectory>%BASE%</workingdirectory>
+
+  <env name="NODE_ENV" value="production"/>
+
+  <startmode>Automatic</startmode>
+  <onfailure action="restart" delay="5 sec"/>
+  <resetfailure>1 hour</resetfailure>
+
+  <log mode="roll-by-size">
+    <sizeThreshold>10240</sizeThreshold>
+    <keepFiles>8</keepFiles>
+  </log>
+</service>

@@ -1,0 +1,42 @@
+# 인증 근거자료 웹 바인더: systemd 유닛 (설계서 §7)
+# 설치:
+#   1) 릴리스 zip 을 /opt/qaevidence 에 펼친다 (server/ web/ node_modules/ runtime/ package.json … 이 루트에).
+#   2) 사용자 생성:  sudo useradd --system --home /opt/qaevidence --shell /usr/sbin/nologin qaevidence
+#   3) 데이터 폴더와 설정 파일:
+#                    sudo mkdir -p /opt/qaevidence/data
+#                    sudo cp -n /opt/qaevidence/config.example.json /opt/qaevidence/config.json
+#   4) 소유권:       sudo chown -R qaevidence:qaevidence /opt/qaevidence
+#   5) 이 파일 복사: sudo cp packaging/qaevidence.service /etc/systemd/system/
+#   6) 기동:         sudo systemctl daemon-reload && sudo systemctl enable --now qaevidence
+# 선행조건: 없음. 릴리스 zip 동봉 런타임(runtime/node)을 쓴다. 소스 구동 시에만 시스템 Node 필요.
+# 포트, 데이터 경로는 /opt/qaevidence/config.json 에서 조정한다.
+
+[Unit]
+Description=인증 근거자료 웹 바인더 (QA Evidence Web Binder)
+Documentation=file:/opt/qaevidence/docs
+After=network.target
+# 크래시 반복 시 과도한 재시작 억제 (이 두 줄은 [Unit] 에 있어야 한다. [Service] 에 두면 systemd 가 무시한다)
+StartLimitIntervalSec=60
+StartLimitBurst=5
+
+[Service]
+Type=simple
+User=qaevidence
+Group=qaevidence
+WorkingDirectory=/opt/qaevidence
+Environment=NODE_ENV=production
+# node 경로가 다르면 수정: which node
+ExecStart=/opt/qaevidence/runtime/node --import tsx server/src/index.ts
+Restart=on-failure
+RestartSec=5
+
+# 보안 강화: ProtectSystem=full 은 /usr, /boot, /etc 를 읽기 전용으로 둔다. 설치 루트는 쓸 수 있다(설정 파일이 없으면 첫
+# 기동 때 앱이 만든다). ReadWritePaths 의 경로가 없으면 systemd 가 기동 전에 실패하므로(226/NAMESPACE) 앞에 '-' 를 붙여
+# 없는 경로는 건너뛰게 한다. 더 좁히려면 ProtectSystem=strict 로 바꾸고 설치 3) 을 먼저 해 둔다(그때는 이 두 경로만 쓸 수 있다).
+NoNewPrivileges=true
+ProtectSystem=full
+PrivateTmp=true
+ReadWritePaths=-/opt/qaevidence/data -/opt/qaevidence/config.json
+
+[Install]
+WantedBy=multi-user.target

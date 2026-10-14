@@ -1,0 +1,283 @@
+/*
+ * 시트 보기(SheetView): 엑셀 같은 격자
+ * 앱이 정하는 색은 styles.css :root 의 색 토큰만 쓴다. 칸 채우기, 글자색, 테두리는 문서 내용이라
+ * 모델 값 그대로 인라인으로 그린다. 모든 규칙을 .osv-root 아래로 묶어 다른 문서 보기와 섞이지 않게 한다.
+ * z-index 층은 SheetView.tsx 머리 주석과 같다(.osv-root 는 쌓임 맥락을 만들지 않는다: 바깥 하이라이트 층과 섞인다).
+ */
+
+.osv-root {
+  --osv-grid: var(--rule);
+  --osv-head-bg: var(--panel);
+  --osv-head-ink: var(--ink-2);
+  --osv-freeze: var(--muted);
+  --osv-font: Arial, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  /* 서식 없는 칸의 문서 글꼴: 모델의 열 너비(px)가 엑셀 숫자 폭 7px(Calibri 11pt) 기준이라 Calibri 를 먼저 */
+  --osv-cell-font: Calibri, var(--osv-font);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  min-width: 0;
+  background: var(--surface);
+  color: var(--ink);
+  font-family: var(--osv-font);
+}
+
+/* 빈 칸 격자선: --rule 을 바탕 쪽으로 옅게 해 엑셀 격자 정도의 낮은 대비로 */
+@supports (color: color-mix(in srgb, #000 50%, #fff)) {
+  .osv-root {
+    --osv-grid: color-mix(in srgb, var(--rule) 70%, var(--surface));
+  }
+}
+
+.osv-root .osv-scroll {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  background: var(--surface);
+  overscroll-behavior: contain;
+  scrollbar-color: var(--rule) var(--surface);
+}
+
+/* 격자 요소(data-page): 하이라이트를 겹쳐 그릴 기준 상자 */
+.osv-root .osv-page {
+  position: relative;
+  width: max-content;
+  min-width: 100%;
+}
+
+.osv-root .osv-grid {
+  border-collapse: separate;
+  border-spacing: 0;
+  table-layout: fixed;
+  margin: 0;
+  background: var(--surface);
+  color: var(--ink);
+  font-family: var(--osv-cell-font);
+  font-size: 11pt;
+  font-weight: 400;
+  line-height: 1.25;
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+}
+
+/* 칸: 격자선은 오른쪽, 아래만 (왼쪽, 위는 이웃 칸이 그린다) */
+.osv-root .osv-grid td {
+  box-sizing: border-box;
+  padding: 0;
+  border: 0 solid var(--osv-grid);
+  border-right-width: 1px;
+  border-bottom-width: 1px;
+  background-clip: border-box;
+  text-align: left;
+  vertical-align: bottom;
+  overflow: visible;
+}
+
+/* 칸 글자: 공백과 줄바꿈을 그대로 둔다. 줄 바꿈 서식 칸은 글자 상자 폭에서 접는다 */
+.osv-root .osv-c {
+  box-sizing: border-box;
+  padding: 0 3px;
+  white-space: pre-wrap;
+  word-break: normal;
+  overflow-wrap: break-word;
+}
+
+/* 줄 바꿈 서식이 없는 글자: 엑셀처럼 접지 않고 글자 상자(칸 + 흘릴 자리) 끝에서 자른다.
+   overflow 대신 clip-path 로 자른다(overflow 는 visible 로 남긴다: SheetView.tsx 머리 주석) */
+.osv-root .osv-c.osv-clip {
+  white-space: pre;
+  overflow-wrap: normal;
+  clip-path: inset(0);
+}
+/* 글자 안에 줄바꿈이 있는 한 줄 칸: 엑셀처럼 한 줄로 잇는다(글자 노드는 그대로, 보이는 모양만) */
+.osv-root .osv-c.osv-clip.osv-nl {
+  white-space: nowrap;
+}
+
+/* 숫자, 날짜: 한 줄, 자릿수 폭을 고르게. 넘치면 SheetView 가 그린 뒤 재어서 글자 크기를 줄인다(fitCells) */
+.osv-root .osv-c.osv-num {
+  white-space: pre;
+  overflow-wrap: normal;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 틀 고정 칸: 스크롤해도 제자리 (top, left 는 인라인). 아래로 지나가는 칸을 가리도록 바탕을 채운다 */
+.osv-root .osv-grid td.osv-fr,
+.osv-root .osv-grid td.osv-fc {
+  position: sticky;
+  background-color: var(--surface);
+}
+.osv-root .osv-grid td.osv-fc {
+  z-index: 1;
+}
+.osv-root .osv-grid td.osv-fr {
+  z-index: 2;
+}
+.osv-root .osv-grid td.osv-fr.osv-fc {
+  z-index: 3;
+}
+.osv-root .osv-grid td.osv-frb,
+.osv-root .osv-grid th.osv-frb {
+  border-bottom-color: var(--osv-freeze);
+}
+.osv-root .osv-grid td.osv-fcb,
+.osv-root .osv-grid th.osv-fcb {
+  border-right-color: var(--osv-freeze);
+}
+/* 고정 칸의 글자가 오른쪽 빈 칸으로 흐를 때(SheetView.tsx 머리 주석): 받는 칸은 바탕을 비우고 마우스를
+   원본 칸으로 통과시킨다. 원본 칸은 받는 칸들의 채우기를 옮긴 밑판을 자기 쌓임 맥락 안, 글자 아래에 깐다.
+   밑판은 고정 띠 아래로 지나가는 칸을 가리므로 고정 칸의 바탕 노릇을 대신한다(자리, 바탕은 인라인) */
+.osv-root .osv-grid td.osv-clear {
+  pointer-events: none;
+}
+.osv-root .osv-grid .osv-under {
+  position: absolute;
+  z-index: -1;
+}
+/* 표 오른쪽 바깥(마지막 열 너머로 흐른 글자 자리)의 열 머리, 고정 행 높이 덮개. 표 앞의 높이 0 띠가 위에
+   붙어 있고, 그 안의 상자가 표 오른쪽 끝에서 시작한다(자리, 크기는 인라인). 층은 고정 열과 같은 1:
+   일반 칸의 글자보다 위, 고정 행에서 흘러온 글자(2 이상)보다 아래 */
+.osv-root .osv-tailcap {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  height: 0;
+}
+.osv-root .osv-tailcap > div {
+  position: absolute;
+  top: 0;
+  background: var(--surface);
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* 행 머리, 열 머리: 표시 전용 (선택, 복사에서 빠진다) */
+.osv-root .osv-grid th {
+  box-sizing: border-box;
+  padding: 0 4px;
+  border: 0 solid var(--rule);
+  border-right-width: 1px;
+  border-bottom-width: 1px;
+  background: var(--osv-head-bg);
+  color: var(--osv-head-ink);
+  font-family: var(--osv-font);
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 1;
+  text-align: center;
+  vertical-align: middle;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.osv-root .osv-grid th.osv-ch {
+  position: sticky;
+  top: 0;
+  z-index: 7;
+}
+.osv-root .osv-grid th.osv-ch.osv-fc {
+  z-index: 8;
+}
+.osv-root .osv-grid th.osv-rh {
+  position: sticky;
+  left: 0;
+  z-index: 5;
+}
+.osv-root .osv-grid th.osv-rh.osv-fr {
+  z-index: 6;
+}
+.osv-root .osv-grid th.osv-corner {
+  position: sticky;
+  top: 0;
+  left: 0;
+  z-index: 8;
+}
+
+/* 가상화로 그리지 않은 행들의 자리: 빈 채움 칸만 (같은 줄의 병합 기준 칸은 보통 칸 모양 그대로) */
+.osv-root .osv-grid tr.osv-gap > td.osv-fill {
+  padding: 0;
+  border: 0;
+  background: var(--surface);
+}
+
+/* 칸 없는 글자 조각(숨긴 행/열, 병합에 가려진 칸): DOM 에는 있되(오프셋 대응용) 상자를 만들지 않는다.
+   display: none 이라 getClientRects 가 비어서 하이라이트 사각형도 생기지 않는다 */
+.osv-root .osv-ghost {
+  display: none;
+}
+
+/* 칸으로 이동한 자리: 굵은 테두리 + 노랑 반 형광이 잠깐 비쳤다 사라진다 */
+.osv-root .osv-grid td.osv-mark {
+  box-shadow: inset 0 0 0 2px var(--ink);
+  animation: osv-flash 1.4s ease-out;
+}
+@keyframes osv-flash {
+  from {
+    background-color: var(--y-half);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .osv-root .osv-grid td.osv-mark {
+    animation: none;
+  }
+}
+
+.osv-root .osv-empty {
+  margin: 0;
+  padding: 40px 16px;
+  color: var(--muted);
+  font-size: 14px;
+  text-align: center;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* 아래쪽 띠: 시트 탭(앱의 칩 모양) + 잘림 안내 */
+.osv-root .osv-foot {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 40px;
+  padding: 6px 10px;
+  border-top: 1px solid var(--border);
+  background: var(--panel);
+  user-select: none;
+  -webkit-user-select: none;
+}
+.osv-root .osv-tabs {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 2px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
+}
+.osv-root .osv-tabs .chip {
+  flex: none;
+  max-width: 240px;
+}
+.osv-root .osv-tab-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.osv-root .osv-note {
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: 60%;
+  margin-left: auto;
+  color: var(--ink-2);
+  font-size: 12.5px;
+  line-height: 1.4;
+}

@@ -1,0 +1,253 @@
+/* PowerPoint(pptx) 보기: SlidesView.tsx
+   회색 바탕 위에 흰 슬라이드를 세로로 쌓는다(PlainView 의 종이와 같은 결: 옅은 테두리, 작은 그림자).
+   화면 틀(바탕, 캡션, 배지, 안내)은 styles.css :root 의 색 토큰만 쓴다. 슬라이드 안의 색, 글꼴은
+   문서 자신의 값(모델)이고, 모델에 없으면 흰 바탕, 검은 글자, 앱 글꼴 줄로 그린다.
+   슬라이드 상자(.osl-canvas)가 크기 컨테이너라 안쪽 길이(글자 크기, 여백, 들여쓰기)는 cqw 로 슬라이드
+   너비를 따라간다. cqw 는 상자 안쪽 요소에만 쓴다.
+   모든 규칙을 뿌리 .osl-deck 아래로 묶는다. 렌더러 css 는 한 화면에 함께 실리므로(OfficeViewerPane 이
+   모두 들여오고, 첨부 미리보기에서 한 번 받은 css 는 그대로 남는다) 다른 렌더러의 요소에 번지면 안 된다. */
+
+.osl-deck {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  min-height: 100%;
+  padding: 20px 16px 28px;
+  background: var(--panel);
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+}
+.osl-deck *,
+.osl-deck *::before,
+.osl-deck *::after {
+  box-sizing: border-box;
+}
+
+/* 폭은 덱을 따른다. 뷰어가 배율을 줄 때는 배율 1일 때의 폭(--osl-slide-w, OfficeViewerPane)으로 고정해
+   zoom 이 슬라이드를 실제로 키우게 한다(덱 폭을 따르면 덱도 같은 배율로 좁아져 크기가 그대로다) */
+.osl-deck .osl-slide {
+  flex: none;
+  width: var(--osl-slide-w, 100%);
+  max-width: 1280px;
+  min-width: 0;
+  margin: 0;
+}
+
+/* content-visibility: 화면 밖 슬라이드는 배치, 그리기를 건너뛴다(크기는 aspect-ratio 로 그대로라 스크롤
+   위치가 흔들리지 않는다). 348장 덱 실측: 폭을 바꿀 때 한 번에 30~60ms, 없으면 750~900ms.
+   DOM 은 그대로라 선택, 오프셋 대응, 쪽 찾기, getBoundingClientRect, scrollIntoView 는 같게 동작한다.
+   이 속성과 overflow 는 슬라이드 밖을 자른다(PowerPoint 슬라이드 쇼와 같다). 정본 글자가 밖으로 나간
+   슬라이드는 osl-slide-spill 이 되어 자르지 않는다(아래). */
+.osl-deck .osl-canvas {
+  position: relative;
+  width: 100%;
+  container-type: inline-size;
+  content-visibility: auto;
+  isolation: isolate;
+  overflow: hidden;
+  background: #fff;
+  box-shadow:
+    0 0 0 1px var(--border),
+    var(--shadow-sm);
+  color: #000;
+  font-family: Arial, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+  line-height: 1.2;
+  text-align: left;
+  letter-spacing: normal;
+  word-spacing: normal;
+  text-transform: none;
+}
+
+/* 넘침 모드: 정본 글자가 슬라이드 밖으로 나갔다. 글자를 자르지 않고(검색, 앵커 하이라이트가 보이는 글자
+   위에 놓이게), 위아래로 나간 만큼 비운 자리(.osl-room)가 이웃 슬라이드와 캡션을 밀어낸다.
+   그림과 개체 자리는 .osl-clip 이 계속 슬라이드 안으로 자른다. */
+.osl-deck .osl-slide-spill > .osl-canvas {
+  overflow: visible;
+  content-visibility: visible;
+}
+.osl-deck .osl-room {
+  height: 0;
+}
+
+/* 숨긴 슬라이드: 캡션의 '숨김' 배지에 더해 점선 테두리 (글자는 흐리게 하지 않는다) */
+.osl-deck .osl-slide-hidden .osl-canvas {
+  outline: 1px dashed var(--muted);
+  outline-offset: 3px;
+}
+
+/* ── 도형 ── */
+.osl-deck .osl-shape {
+  position: absolute;
+  margin: 0;
+}
+
+/* 슬라이드 크기의 자르개: 그림, 개체 자리를 슬라이드 안으로 자른다. 포인터는 아래 글자로 통과 */
+.osl-deck .osl-clip {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* 글상자 본문: 세로 맞춤(위, 가운데, 아래)은 justify-content. 넘치는 글자는 상자에서 자르지 않는다
+   (PowerPoint 와 같다) */
+.osl-deck .osl-tb {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+.osl-deck .osl-tx {
+  flex: none;
+  min-width: 0;
+}
+
+.osl-deck .osl-p {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+/* 빈 문단도 한 줄 높이를 갖게: 폭 없는 글자(생성 내용이라 DOM 글자가 아니다) */
+.osl-deck .osl-p:empty::before {
+  content: "\200B";
+}
+/* 줄바꿈으로 끝나는 문단: 그 뒤 빈 줄도 한 줄 높이(PowerPoint 와 같다). 높이는 줄바꿈 조각의 크기 */
+.osl-deck .osl-p-trail::after {
+  content: "\200B";
+  font-size: var(--osl-trail);
+}
+
+/* 글머리 기호(표시 전용): 들여쓰기 자리에 매달아 그린다 */
+.osl-deck .osl-bullet {
+  display: inline-block;
+  padding-right: 0.25em;
+  text-indent: 0;
+  white-space: pre;
+  font-family: Arial, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  text-decoration: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.osl-deck .osl-pic {
+  display: block;
+  object-fit: fill;
+  max-width: none;
+  max-height: none;
+  pointer-events: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+/* 잘라 낸 그림: 상자가 잘라 낸 뒤 크기, 안쪽 그림은 상자 기준 % 자리(인라인) */
+.osl-deck .osl-crop {
+  overflow: hidden;
+  pointer-events: none;
+}
+.osl-deck .osl-crop .osl-pic {
+  position: absolute;
+}
+
+/* 표: 상자를 채우고 열 너비는 모델 비율. 칸 테두리는 모델에 없어 옅은 선으로 구조만 보인다 */
+.osl-deck .osl-table {
+  width: 100%;
+  height: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+.osl-deck .osl-table td {
+  border: 1px solid rgba(0, 0, 0, 0.28);
+  vertical-align: top;
+  overflow-wrap: anywhere;
+}
+
+/* 그리지 않는 개체(차트, SmartArt, OLE 등): 점선 자리 상자와 이름(표시 전용). 포인터는 통과 */
+.osl-deck .osl-other {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px dashed #8c8c8c;
+  background: rgba(244, 244, 244, 0.75);
+  overflow: hidden;
+  pointer-events: none;
+}
+.osl-deck .osl-other-label {
+  max-width: 100%;
+  padding: 0 4px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: max(10px, 1.1cqw);
+  line-height: 1.3;
+  color: #5e5e5e;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* ── 캡션(표시 전용) ── 작은 글자라 --ink-2 (panel 위 대비 8.9:1, --muted 는 4.1:1 로 부족) */
+.osl-deck .osl-cap {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  margin-top: 6px;
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--ink-2);
+  font-variant-numeric: tabular-nums;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.osl-deck .osl-badge {
+  padding: 0 6px;
+  border-radius: 3px;
+  background: var(--y-badge);
+  color: var(--ink);
+  font-weight: 700;
+}
+.osl-deck .osl-badge-spill {
+  background: var(--y-tint);
+  box-shadow: inset 0 0 0 1px var(--rule);
+  font-weight: 400;
+}
+
+.osl-deck .osl-deck-note {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ink-2);
+  -webkit-user-select: none;
+  user-select: none;
+}
+.osl-deck .osl-deck-trunc {
+  padding: 10px 14px;
+  color: var(--ink);
+  background: var(--y-tint);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+@media print {
+  .osl-deck {
+    min-height: 0;
+    padding: 0;
+    background: none;
+  }
+  .osl-deck .osl-slide {
+    break-inside: avoid;
+  }
+  .osl-deck .osl-canvas {
+    content-visibility: visible;
+    box-shadow: 0 0 0 1px var(--rule);
+  }
+}

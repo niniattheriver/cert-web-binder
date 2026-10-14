@@ -1,0 +1,113 @@
+/*
+ * 텍스트 문서 보기(PlainView): 회색 바탕 위에 흰 종이를 쌓는다
+ * 색은 styles.css :root 의 색 토큰만 쓴다. 종이는 PDF 뷰어의 쪽과 같은 결(옅은 테두리,
+ * 작은 그림자, 거의 직각 모서리). 다른 문서 보기의 .opv-page 규칙과 섞이지 않도록 모든 규칙을
+ * .opv-plain 아래로 묶고, 종이의 치수 속성은 여기서 전부 정한다.
+ */
+
+.opv-plain {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  min-height: 100%;
+  padding: 20px 16px 28px;
+  background: var(--panel);
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+}
+
+/* 종이 안은 세로 flex: 짧은 쪽에서도 쪽 표시('구간 N')가 종이 아래끝에 붙는다(.opv-cap margin-top: auto) */
+.opv-plain .opv-page {
+  position: relative;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  flex: none;
+  width: 100%;
+  max-width: 840px;
+  min-width: 0;
+  height: auto;
+  min-height: 160px;
+  margin: 0;
+  padding: 36px clamp(16px, 6%, 52px) 18px;
+  overflow: visible;
+  background: var(--surface);
+  color: var(--ink);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  box-shadow: var(--shadow-sm);
+}
+
+/* 정본 글자: 공백과 줄바꿈을 그대로 두고, 넘치는 긴 줄만 접는다 */
+.opv-plain .opv-text {
+  display: block;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ink);
+  font-family: Consolas, "D2Coding", "Malgun Gothic", monospace;
+  font-size: 14px;
+  line-height: 1.65;
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  tab-size: 4;
+}
+
+/* 아래는 모두 표시 전용 (정본 글자 아님): 선택, 복사에 끼지 않게 한다 */
+.opv-plain .opv-empty {
+  margin: 0;
+  font-size: 13px;
+  color: var(--ink-2);
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.opv-plain .opv-cap {
+  margin-top: auto;
+  padding-top: 18px;
+  text-align: right;
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.opv-plain .opv-trunc {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 840px;
+  margin: 0;
+  padding: 10px 14px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ink);
+  background: var(--y-tint);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+@media print {
+  .opv-plain {
+    min-height: 0;
+    padding: 0;
+    gap: 0;
+    background: none;
+  }
+  /* 인쇄는 블록 흐름으로 쪽을 나눈다(쪽 표시는 글 바로 아래 18px, auto 여백은 0) */
+  .opv-plain .opv-page {
+    display: block;
+    max-width: none;
+    min-height: 0;
+    padding: 0 0 12px;
+    border: 0;
+    box-shadow: none;
+  }
+}

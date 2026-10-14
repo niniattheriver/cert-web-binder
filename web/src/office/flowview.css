@@ -1,0 +1,199 @@
+/* 흐름 문서(docx, hwpx) 뷰어: FlowView.tsx
+   종이 크기 쪽을 세로로 쌓는다. 바탕(var(--panel))과 스크롤은 부모 영역이 맡는다.
+   쪽 안의 글자색, 선, 음영은 문서 값 그대로 그린다(앱 팔레트를 덧씌우지 않는다).
+   공백 보존(pre-wrap): 정본 글자의 탭, 줄바꿈, 연속 빈칸이 화면 글자 노드에 그대로 있다.
+   줄 나눔(keep-all): 한글 단어(어절)를 가르지 않는다. Word 의 '한글 단어 잘림 허용' 끔(w:wordWrap 0, 실물 docx
+   88개 모두 기본 문단 스타일에 있다)과 한글의 '어절' 줄 나눔(실물 hwpx 55개의 한글 문단 72%)이 이렇다. PDF 짝
+   7개에서 Word 와 같은 글자에서 줄이 나뉜 비율이 46%에서 65%로 늘었다. 모델에 문단별 설정이 없어 글자 단위로 나누는
+   문단(hwpx 28%, docx 의 w:wordWrap 켬)도 어절로 나눈다. 넘치는 긴 낱말은 overflow-wrap 이 가른다. */
+
+.ofv-flow {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-sizing: border-box;
+  width: max-content;
+  min-width: 100%;
+  padding: 16px;
+  tab-size: 48px;
+}
+
+.ofv-page {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex: none;
+  box-sizing: border-box;
+  margin: 0 auto;
+  background: var(--surface, #ffffff);
+  border: 1px solid var(--border, #e5e5e5);
+  box-shadow: var(--shadow-sm, 0 1px 2px rgba(0, 0, 0, 0.05));
+  color: #000000;
+  font-family: Arial, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  font-size: 10pt;
+  font-weight: 400;
+  font-style: normal;
+  line-height: 1.15;
+  letter-spacing: normal;
+  text-align: left;
+  text-indent: 0;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+  word-break: keep-all;
+}
+
+.ofv-page *,
+.ofv-page *::before,
+.ofv-page *::after {
+  box-sizing: border-box;
+}
+
+/* 머리말, 꼬리말: 표시 전용(정본 글자 아님) */
+.ofv-hdr,
+.ofv-ftr {
+  display: flex;
+  flex-direction: column;
+  flex: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.ofv-ftr {
+  justify-content: flex-end;
+}
+
+/* 블록 목록은 세로 flex: 문단 간격(margin)이 겹치지 않고 더해진다 */
+.ofv-body,
+.ofv-cell,
+.ofv-box {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.ofv-body {
+  flex: 1 0 auto;
+}
+
+.ofv-p {
+  flex: none;
+  margin: 0;
+  min-height: 0;
+}
+/* 빈 문단: 문단 글자 크기와 줄 간격으로 한 줄 높이 (가상 요소라 선택, 복사되지 않는다) */
+.ofv-empty::before {
+  content: "\200B";
+}
+/* 줄 높이 px 문단: 글자 조각이 줄 상자를 키우지 않는다. 조각마다 글꼴의 위아래 비율이 달라 기준선을 맞추면
+   줄 상자가 line-height 보다 커지므로, 줄 높이는 문단 상자의 line-height 하나로 정한다. 번호 자리 묶음은
+   문단의 줄 높이를 그대로 물려받는다(문단과 같은 글꼴이라 줄을 키우지 않는다) */
+.ofv-lpx span:not(.ofv-lbl) {
+  line-height: 0;
+}
+
+/* 내어쓰기 번호 자리: 너비는 인라인 style 의 min-width(내어쓰기 폭). 안쪽 탭은 폭 0.
+   안쪽 여백을 두지 않는다: border-box 라 여백이 min-width 안에 들어가, 폭에 거의 꽉 차는 번호에서
+   뒤 글자가 왼쪽 여백 자리보다 오른쪽으로 밀린다 */
+.ofv-lbl {
+  display: inline-block;
+  padding: 0;
+  text-indent: 0;
+  text-align: left;
+  white-space: pre;
+  tab-size: 0;
+}
+
+.ofv-table {
+  flex: none;
+  border-collapse: collapse;
+  border-spacing: 0;
+  margin: 0;
+  max-width: none;
+  background: transparent;
+}
+.ofv-table td {
+  padding: 1px 6px;
+  vertical-align: top;
+  text-align: left;
+  overflow-wrap: anywhere;
+}
+
+.ofv-img {
+  flex: none;
+  align-self: flex-start;
+  max-width: 100%;
+  line-height: 0;
+}
+/* 높이는 너비와 인라인 aspect-ratio(모델 w / h)로 정한다: 칸보다 넓어 줄어도 모델 비율 그대로 */
+.ofv-img img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  user-select: none;
+  -webkit-user-select: none;
+}
+/* 잘라 낸 그림의 틀: 너비는 인라인 px(칸보다 넓으면 100% 로 줄어든다), 높이는 aspect-ratio. 안쪽 img 는
+   틀 기준 % 자리(인라인)라 틀과 함께 줄어든다 */
+.ofv-crop {
+  position: relative;
+  overflow: hidden;
+  max-width: 100%;
+}
+.ofv-img .ofv-crop img {
+  position: absolute;
+  display: block;
+  max-width: none;
+  max-height: none;
+}
+.ofv-img-missing {
+  flex: none;
+  align-self: flex-start;
+  max-width: 100%;
+  border: 1px dashed var(--rule, #d6d6d6);
+  background: var(--panel, #f4f4f4);
+}
+
+.ofv-box {
+  flex: none;
+  align-self: stretch;
+  max-width: 100%;
+  border: 1px solid #000000;
+  padding: 4px 7px;
+}
+
+/* 안내 문구(쪽 없음, 상한 잘림): 문서 밖 앱 글자 */
+.ofv-note {
+  box-sizing: border-box;
+  align-self: center;
+  width: 100%;
+  max-width: 840px;
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ink-2, #444444);
+  user-select: none;
+  -webkit-user-select: none;
+}
+.ofv-trunc {
+  padding: 10px 14px;
+  color: var(--ink, #000000);
+  background: var(--y-tint, #fff8dc);
+  border: 1px solid var(--border, #e5e5e5);
+  border-radius: 6px;
+}
+
+@media print {
+  .ofv-flow {
+    width: auto;
+    min-width: 0;
+    padding: 0;
+    gap: 0;
+  }
+  .ofv-page {
+    margin: 0;
+    border-color: transparent;
+    box-shadow: none;
+    break-after: page;
+  }
+  .ofv-page:last-of-type {
+    break-after: auto;
+  }
+}

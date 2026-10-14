@@ -1,0 +1,92 @@
+/* 근거자료 뷰어 위쪽 확대/축소 줄 (ZoomBar.tsx). 크롬 PDF 뷰어의 위쪽 막대 자리지만 밝은 바탕을 쓴다(어두운 바탕 금지).
+   PDF, Office, 그림 뷰어가 모두 .pvp-root 안 맨 위에 이 줄을 두고, 문서 스크롤 상자와 연결 안내줄은 그 아래에서 시작한다.
+   색은 styles.css :root 토큰만 쓴다. */
+.pvp-root {
+  --vzb-h: 34px;
+}
+
+.vzb {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 9;
+  box-sizing: border-box;
+  height: var(--vzb-h);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 0 8px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  user-select: none;
+}
+
+.vzb-btn,
+.vzb-pct {
+  height: 26px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--ink);
+  line-height: 1;
+  cursor: pointer;
+}
+.vzb-btn {
+  min-width: 28px;
+  padding: 0 8px;
+  font-size: 16px;
+}
+.vzb-pct {
+  min-width: 58px;
+  padding: 0 6px;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+.vzb-btn:hover:not(:disabled),
+.vzb-pct:hover {
+  background: var(--c-hover);
+}
+.vzb-btn:disabled {
+  color: var(--muted);
+  cursor: default;
+}
+.vzb-btn:focus-visible,
+.vzb-pct:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 1px;
+}
+.vzb-fit {
+  font-size: 13px;
+}
+.vzb-fit.is-on {
+  background: var(--y-badge);
+  border-color: var(--ink);
+  font-weight: 600;
+}
+.vzb-sep {
+  width: 1px;
+  height: 18px;
+  margin: 0 6px;
+  background: var(--border);
+}
+
+/* 단추 줄 아래로: PDF 뷰어의 스크롤 상자(pdf.js 는 절대 위치 상자를 요구한다), 연결 안내줄, 근거 오류 줄 */
+.pvp-root .PdfHighlighter {
+  top: var(--vzb-h);
+  height: calc(100% - var(--vzb-h));
+}
+.pvp-root .pvp-mapbar {
+  top: var(--vzb-h);
+}
+.pvp-root .pvp-anchor-error {
+  top: calc(var(--vzb-h) + 34px);
+}
+
+/* Ctrl+드래그로 배율을 바꾸는 동안 */
+.pvp-root.is-zoom-dragging,
+.pvp-root.is-zoom-dragging * {
+  cursor: ns-resize !important;
+  user-select: none;
+}

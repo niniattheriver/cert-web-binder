@@ -1,0 +1,680 @@
+/*
+ * 근거자료 라이브러리의 형식 칩, 빠른 보기 창(FilePreviewModal), 일괄 업로드 결과, 판본 비교의 단어 단위 표시.
+ * 색은 styles.css :root 토큰만 쓴다(라이트 테마 하나, 어두운 바탕 없음).
+ */
+
+/* 형식 칩: 연도 칩(.year-chip)과 같은 모양, 바탕만 panel 로 구분 */
+.kind-chip {
+  display: inline-block;
+  padding: 0 6px;
+  margin-left: 6px;
+  border: 1px solid var(--c-border);
+  border-radius: 4px;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: var(--c-dim);
+  background: var(--panel);
+  white-space: nowrap;
+}
+.doclib-hit-meta .kind-chip {
+  margin-left: 0;
+  margin-right: 2px;
+}
+
+/* 카드 메타 한 항목(판본 라벨, 쪽 수, 날짜)은 줄바꿈 없이: 항목 사이에서만 끊긴다 */
+.doclib-nowrap {
+  white-space: nowrap;
+}
+
+/* 업로드 폼: 형식이 바뀌는 새 판본 안내 */
+.doclib-kind-note {
+  margin: 0 0 8px;
+}
+
+/* 일괄 업로드 결과: 건너뛴 파일 목록 (실패 목록 .doclib-bulk-failed 와 같은 들여쓰기, 글자는 검정) */
+.doclib-bulk-list {
+  margin-top: 8px;
+}
+.doclib-bulk-list summary {
+  cursor: pointer;
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+.doclib-bulk-skipped {
+  margin: 6px 0 0;
+  padding-left: 18px;
+  font-size: 0.88rem;
+}
+.doclib-bulk-skipped li + li,
+.doclib-bulk-failed li + li {
+  margin-top: 2px;
+}
+
+/* 빠른 보기 창: 첨부 미리보기 틀(.attach-preview)을 거의 전체 화면으로 키운다 */
+.modal-card.attach-preview.filepv {
+  width: min(1680px, 96vw);
+  height: 94vh;
+  max-height: none;
+}
+/* 머리줄이 좁으면(휴대폰 폭) 단추 묶음이 다음 줄로 내려간다: 제목이 0 폭으로 사라지거나 닫기 단추가 창 밖에서
+   잘리지 않게. 제목은 120px 까지 줄고, 그보다 좁아지면 줄을 바꾼다 */
+.filepv .attach-preview-head {
+  flex-wrap: wrap;
+  row-gap: 6px;
+}
+.filepv-title {
+  flex: 1 1 120px;
+  min-width: 0;
+}
+.filepv-actions {
+  margin-left: auto;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 6px;
+  flex: none;
+  max-width: 100%;
+}
+.filepv-actions .btn {
+  text-decoration: none;
+}
+.filepv-actions a.btn:hover {
+  text-decoration: none;
+  background: var(--panel);
+}
+.attach-preview-body.filepv-body {
+  position: relative;
+  padding: 0;
+  overflow: hidden;
+  background: var(--panel);
+}
+/* 뷰어(DocPane)가 height: 100% 를 쓰므로 크기가 정해진 판을 깔아 준다 */
+.filepv-pane {
+  position: absolute;
+  inset: 0;
+}
+.filepv-msg {
+  padding: 24px;
+}
+
+/* 판본 비교: 형식이 다른 판본의 단어 단위 표시 */
+.doccmp-kind-note {
+  margin: 0 0 12px;
+}
+.doccmp-words .doccmp-hunk {
+  padding: 8px 12px;
+  line-height: 1.85;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.doccmp-words .doccmp-hunk + .doccmp-hunk {
+  border-top: 1px solid var(--line);
+}
+.doccmp-w-add {
+  background: var(--y-half);
+  color: var(--ink);
+  text-decoration: none;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+.doccmp-w-del {
+  color: var(--warn);
+  text-decoration: line-through;
+}
+/* 지운 말과 넣은 말이 붙어 나오면('10일간14일간') 사이를 조금 띄운다 */
+.doccmp-w-del + .doccmp-w-add,
+.doccmp-w-add + .doccmp-w-del {
+  margin-left: 3px;
+}
+/* 그림이 낀 버전 쌍: 글자 비교 대신 두 버전을 나란히 (좁은 화면에서는 위아래) */
+.doccmp-images {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  align-items: start;
+}
+@media (max-width: 720px) {
+  .doccmp-images {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.doccmp-image {
+  margin: 0;
+  padding: 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+.doccmp-image-cap {
+  margin-bottom: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+}
+.doccmp-image img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto;
+}
+.doccmp-image-msg {
+  margin: 0;
+  padding: 24px 8px;
+  color: var(--ink-2);
+  text-align: center;
+}
+
+/* ══ 근거자료 라이브러리 화면 (글자 크기와 구성, 연도 드롭다운, 끌어다 놓기) ══════════════════════════════════════
+   글자 크기는 역할마다 다섯 단계만 쓴다. 크기, 굵기, 줄 간격, 자간을 한 벌로 정한다(큰
+   글자는 자간을 좁히고 줄 간격을 줄이며, 작은 글자는 자간을 조금 넓힌다).
+     20px  쪽 제목                     굵게, 줄 간격 1.3, 자간 -0.02em
+     16px  카드 제목                     굵게, 1.4, -0.01em
+     14px  쪽 설명, 검색 입력과 결과, 알림, 폼, 목록의 자료 이름(굵게)   보통, 1.6
+     13px  카드 정보 줄, 목록의 칸과 열 머리, 단추, 연도 탭   보통, 1.5
+     12px  칩, 배지, 분류 코드            1.4, +0.015em
+   한글 줄은 어절 단위로 나눈다(keep-all): '운영 규' / '정처럼'처럼 낱말 가운데서 끊지 않는다.
+   본문 14px 은 앱 전체 기준(styles.css 디자인 계층)이다. rem 은 html 기본 16px 기준이라 사용자가 브라우저 글자 크기를
+   키우면 함께 커진다. 이전에는 카드 정보 줄(15.2px)이 쪽 설명(13px)보다 크고 분류 코드(18.4px)가 카드 제목보다 커서
+   위계가 뒤집혀 있었다. 모든 규칙을 .doclib-page 아래에 두어 다른 화면에는 영향이 없다. */
+.doclib-page {
+  /* 앱 공통 단계(styles.css --fs-*)를 그대로 쓴다 */
+  --dl-title: var(--fs-title);
+  --dl-head: var(--fs-head);
+  --dl-body: var(--fs-body);
+  --dl-meta: var(--fs-meta);
+  --dl-caption: var(--fs-caption);
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+
+/* 머리: 제목과 설명 묶음. 올리기 단추는 아래 끌어다 놓기 칸의 [내 PC에서 선택] 하나다 */
+.doclib-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.5rem;
+  margin-bottom: 1.25rem;
+}
+.doclib-head-text {
+  min-width: 0;
+  max-width: 48rem;
+}
+.doclib-page .doclib-head h1 {
+  font-size: var(--dl-title);
+  font-weight: var(--fw-title);
+  line-height: 1.3;
+  letter-spacing: -0.02em;
+}
+.doclib-lead {
+  margin: 0.375rem 0 0;
+  font-size: var(--dl-body);
+  line-height: 1.6;
+  color: var(--ink-2);
+}
+.doclib-formats {
+  margin: 0.25rem 0 0;
+  font-size: var(--dl-meta);
+  line-height: 1.5;
+  color: var(--ink-2);
+}
+
+/* 연도와 검색 한 줄: 연도 드롭다운(왼쪽, 고정 폭)과 검색 입력(나머지 폭). 높이를 맞춘다 */
+.doclib-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+.doclib-year {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: none;
+}
+.doclib-year-label {
+  font-size: var(--dl-meta);
+  font-weight: var(--fw-head);
+  color: var(--ink-2);
+}
+.doclib-page .doclib-year select {
+  height: 2.5rem;
+  min-width: 7.5rem;
+  padding: 0 2rem 0 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background-color: var(--surface);
+  font-size: var(--dl-body);
+  color: var(--ink);
+}
+
+/* 검색 줄: 카드 없이 입력과 단추만, 높이를 맞춘다 */
+.doclib-page .doclib-search {
+  display: flex;
+  flex: 1 1 18rem;
+  min-width: 0;
+  gap: 0.5rem;
+}
+.doclib-page .doclib-search input {
+  flex: 1;
+  min-width: 0;
+  height: 2.5rem;
+  padding: 0 0.875rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  font-size: var(--dl-body);
+}
+.doclib-page .doclib-search .btn {
+  height: 2.5rem;
+  padding: 0 1.125rem;
+  font-size: var(--dl-meta);
+}
+
+/* 끌어다 놓기 영역: 점선 테두리 판. 파일이 위에 오면 테두리와 바탕으로 '여기 놓는다'를 바로 알린다
+   (반응은 즉시. 움직임은 바탕색 전환뿐이라 동작 줄이기 설정에서도 그대로 둔다) */
+.doclib-drop {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.375rem;
+  margin-bottom: 1.25rem;
+  padding: 1.25rem 1rem;
+  border: 1.5px dashed var(--rule);
+  border-radius: var(--radius);
+  background: var(--surface);
+  text-align: center;
+  transition: background-color 120ms ease-out, border-color 120ms ease-out;
+}
+/* 넓은 면이라 노랑 사다리의 가장 옅은 단계(tint), 테두리는 잉크 (팔레트: 면적이 넓을수록 옅게) */
+.doclib-drop.is-over {
+  border-color: var(--ink);
+  background: var(--y-tint);
+}
+.doclib-drop.is-busy {
+  border-style: solid;
+  background: var(--panel);
+}
+.doclib-drop-title {
+  margin: 0;
+  font-size: var(--dl-body);
+  font-weight: var(--fw-head);
+  line-height: 1.5;
+  color: var(--ink);
+}
+.doclib-drop-sub {
+  margin: 0;
+  max-width: 40rem;
+  font-size: var(--dl-meta);
+  line-height: 1.5;
+  color: var(--ink-2);
+}
+/* [내 PC에서 선택]: 이 화면의 유일한 올리기 단추라 검정(.btn-primary) */
+.doclib-page .doclib-drop .btn {
+  margin-top: 0.25rem;
+  height: 2.25rem;
+  padding: 0 1rem;
+  font-size: var(--dl-meta);
+}
+
+/* 검색 결과 카드 */
+.doclib-page .doclib-hits {
+  margin: -0.25rem 0 1.25rem;
+  padding: 0.75rem;
+}
+.doclib-page .doclib-hits > .dim {
+  margin: 0.25rem;
+  font-size: var(--dl-body);
+}
+.doclib-page .doclib-hit-list button {
+  padding: 0.625rem 0.75rem;
+}
+.doclib-page .doclib-hit-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.375rem;
+  margin-bottom: 0.25rem;
+  font-size: var(--dl-meta);
+  line-height: 1.5;
+  color: var(--ink-2);
+}
+.doclib-hit-title {
+  font-weight: 600;
+  color: var(--ink);
+}
+.doclib-page .doclib-hit-snippet {
+  display: block;
+  font-size: var(--dl-body);
+  line-height: 1.6;
+  word-break: keep-all;
+}
+
+/* 칩과 배지: 12px, 같은 높이. 분류 코드 칩은 굵게, 연도와 형식 칩은 보통 */
+.doclib-page .year-chip,
+.doclib-page .kind-chip,
+.doclib-page .doclib-code,
+.doclib-page .doclib-warn {
+  display: inline-flex;
+  align-items: center;
+  height: 1.25rem;
+  margin: 0;
+  padding: 0 0.375rem;
+  font-size: var(--dl-caption);
+  line-height: 1;
+  letter-spacing: 0.015em;
+}
+
+/* 카드: 위에서 아래로 코드, 제목, 칩, 정보 줄, 발췌 수, 단추. 묶음 사이 간격으로 관계를 나타낸다 */
+.doclib-page .doclib-card {
+  gap: 0;
+  padding: 1.25rem;
+  cursor: default;
+}
+.doclib-page .doclib-card:hover {
+  border-color: var(--rule);
+}
+.doclib-code {
+  border: 1px solid var(--c-border);
+  border-radius: 4px;
+  background: var(--surface);
+  font-weight: 600;
+  color: var(--ink);
+  white-space: nowrap;
+}
+.doclib-page .doclib-card .doclib-title {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  font-size: var(--dl-head);
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  text-decoration: none;
+}
+.doclib-page .doclib-card .doclib-title:hover {
+  text-decoration: underline;
+  background: none;
+}
+.doclib-tags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.375rem;
+  margin-top: 0.625rem;
+}
+.doclib-meta {
+  margin: 0.5rem 0 0;
+  font-size: var(--dl-meta);
+  line-height: 1.5;
+  color: var(--ink-2);
+}
+.doclib-meta + .doclib-meta {
+  margin-top: 0.125rem;
+}
+.doclib-page .doclib-yearver {
+  font-size: var(--dl-meta);
+}
+.doclib-stats {
+  margin: 0.5rem 0 0;
+  font-size: var(--dl-meta);
+  line-height: 1.5;
+  color: var(--ink);
+}
+.doclib-stats b {
+  font-weight: 700;
+}
+
+/* 단추: 위 줄 두 개는 같은 폭, 아래 줄은 글자 단추(왼쪽 끝을 카드 글자 시작선에 맞춘다) */
+.doclib-page .doclib-card-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  margin-top: auto;
+  padding-top: 1rem;
+}
+.doclib-actions-main {
+  display: flex;
+  gap: 0.5rem;
+}
+.doclib-page .doclib-actions-main .btn {
+  flex: 1 1 0;
+  justify-content: center;
+  height: 2rem;
+  font-size: var(--dl-meta);
+}
+.doclib-actions-more {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  margin-left: -0.625rem;
+}
+.doclib-page .doclib-actions-more .btn {
+  height: 1.75rem;
+  padding: 0 0.625rem;
+  font-size: var(--dl-meta);
+  color: var(--ink-2);
+}
+.doclib-page .doclib-actions-more .btn:hover:not(:disabled) {
+  color: var(--ink);
+  background: var(--panel);
+}
+
+/* 목록 위 줄: 자료 수(왼쪽)와 보기 방식 전환(오른쪽, 연도 화면과 같은 .view-toggle) */
+.doclib-listbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.625rem;
+}
+.doclib-count {
+  margin: 0;
+  font-size: var(--dl-meta);
+  line-height: 1.5;
+  color: var(--ink-2);
+}
+.doclib-count b {
+  font-weight: 700;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+.doclib-page .view-toggle-btn {
+  font-size: var(--dl-meta);
+}
+
+/* 목록 보기: 탐색기의 '자세히' 보기처럼 한 자료가 한 줄. 공용 .simple-table 위에 글자 크기, 열 폭, 줄 간격만 정한다.
+   이름 14px 굵게, 나머지 칸 13px, 수는 오른쪽 정렬과 고정폭 숫자 */
+.doclib-page .doclib-table {
+  font-size: var(--dl-meta);
+  line-height: 1.5;
+}
+.doclib-page .doclib-table th,
+.doclib-page .doclib-table td {
+  padding: 0.5rem 0.75rem;
+}
+.doclib-page .doclib-table td {
+  color: var(--ink-2);
+}
+.doclib-page .doclib-table .col-right {
+  font-variant-numeric: tabular-nums;
+}
+.doclib-row:hover {
+  background: var(--c-hover);
+}
+.doclib-col-name {
+  min-width: 14rem;
+}
+.doclib-name {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.375rem;
+}
+.doclib-file-icon {
+  flex: none;
+  color: var(--ink-2);
+}
+.doclib-page .doclib-row-title {
+  font-size: var(--dl-body);
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--ink);
+  text-decoration: none;
+}
+.doclib-page .doclib-row-title:hover {
+  text-decoration: underline;
+  background: none;
+}
+.doclib-col-date,
+.doclib-col-type,
+.doclib-col-size,
+.doclib-col-ver,
+.doclib-col-amount,
+.doclib-col-hl,
+.doclib-col-linked,
+.doclib-col-actions {
+  white-space: nowrap;
+}
+.doclib-page .doclib-col-ver .year-chip {
+  margin-left: 0.375rem;
+}
+.doclib-row-sub {
+  display: block;
+  font-size: var(--dl-caption);
+  line-height: 1.4;
+}
+.doclib-row-actions {
+  display: flex;
+  gap: 0.375rem;
+}
+.doclib-page .doclib-row-actions .btn {
+  height: 1.75rem;
+  padding: 0 0.625rem;
+  font-size: var(--dl-meta);
+}
+
+/* 열 머리 정렬 단추: 글자처럼 보이고 누르면 그 열로 정렬한다(한 번 더 누르면 반대 순서). 지금 기준인 열은 검정과 화살표 */
+.doclib-sort {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  /* 화살표 자리가 비어 있어도 열 머리 글자가 같은 높이에 서도록 기준선 대신 가운데에 맞춘다 */
+  vertical-align: middle;
+}
+.doclib-sort:hover,
+.doclib-sort.is-on {
+  color: var(--ink);
+}
+.doclib-sort:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+.doclib-sort-mark {
+  min-width: 0.75em;
+}
+/* 오른쪽 정렬 열(수)은 화살표 자리를 글자 앞에 둔다: 열 이름의 오른쪽 끝이 아래 숫자의 오른쪽 끝과 맞는다 */
+.doclib-table th.col-right .doclib-sort {
+  flex-direction: row-reverse;
+}
+
+/* 누르는 순간 바로 눌린 느낌(손을 뗄 때가 아니라 누를 때) */
+.doclib-page .btn:active:not(:disabled) {
+  box-shadow: inset 0 0 0 1px var(--ink-2);
+}
+
+/* 일괄 업로드 결과, 업로드 알림, 업로드 폼, 빈 목록: 본문 14px, 보조 13px */
+.doclib-page .doclib-bulk,
+.doclib-page .doclib-notice,
+.doclib-page .notice-inline,
+.doclib-page .form-error {
+  font-size: var(--dl-body);
+  line-height: 1.6;
+}
+.doclib-page .doclib-bulk-list summary,
+.doclib-page .doclib-bulk-skipped,
+.doclib-page .doclib-bulk-failed,
+.doclib-page .doclib-year-note,
+.doclib-page .doclib-source-hint {
+  font-size: var(--dl-meta);
+}
+.doclib-page .doclib-upload .card-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: var(--dl-head);
+  line-height: 1.4;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+.doclib-page .doclib-upload .field-label {
+  font-size: var(--dl-meta);
+}
+.doclib-page .doclib-upload .field input {
+  height: 2.25rem;
+  font-size: var(--dl-body);
+}
+.doclib-page .doclib-upload .btn-row .btn {
+  height: 2.25rem;
+  font-size: var(--dl-meta);
+}
+/* 파일 고르기 줄: 단추와 고른 파일 이름을 같은 줄 가운데에 (공용 .btn-row 의 위 여백 16px 을 쓰지 않는다) */
+.doclib-page .doclib-upload .field .btn-row {
+  align-items: center;
+  margin-top: 0.25rem;
+  font-size: var(--dl-body);
+}
+.doclib-page .empty-title {
+  font-size: var(--dl-head);
+}
+.doclib-page .empty-state .dim,
+.doclib-page .page-status {
+  font-size: var(--dl-body);
+}
+
+/* 쪽 맨 아래 출처 문구 (한컴 HWP 공개 문서 이용 조건) */
+.doclib-credit {
+  margin: 2rem 0 0;
+  font-size: var(--dl-caption);
+  line-height: 1.5;
+  color: var(--ink-2);
+}
+
+/* 좁은 화면: 목록에서 덜 쓰는 열부터 숨긴다(이름, 유형, 작업은 끝까지 남는다). 그래도 넘치면 표 상자 안에서 가로로 밀린다 */
+@media (max-width: 1180px) {
+  .doclib-col-amount,
+  .doclib-col-hl {
+    display: none;
+  }
+}
+@media (max-width: 900px) {
+  .doclib-col-ver,
+  .doclib-col-linked {
+    display: none;
+  }
+  /* 작업 단추 셋은 줄을 바꿔 세로로 쌓는다(한 줄로 두면 표가 상자보다 넓어진다) */
+  .doclib-col-actions {
+    white-space: normal;
+  }
+  .doclib-row-actions {
+    flex-wrap: wrap;
+  }
+}
+@media (max-width: 640px) {
+  .doclib-col-date,
+  .doclib-col-size {
+    display: none;
+  }
+  .doclib-col-name {
+    min-width: 9rem;
+  }
+}

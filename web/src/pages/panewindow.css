@@ -1,0 +1,52 @@
+/* 떼어 낸 근거자료 창 (PaneWindow.tsx): 머리줄 한 줄 + 뷰어가 창 전체를 채운다.
+   머리줄은 문항 상세 오른쪽 칸 머리(.qd3-pane-head)와 같은 모양, 색은 styles.css :root 토큰만 쓴다. */
+.pw-page {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+}
+.pw-head {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 12px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  min-width: 0;
+}
+.pw-head.is-map {
+  background: var(--c-accent-bg);
+  border-bottom-color: var(--c-accent);
+}
+.pw-title {
+  font-weight: 600;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+.pw-spacer {
+  flex: 1 1 auto;
+}
+.pw-q {
+  white-space: nowrap;
+  font-size: var(--fs-meta);
+}
+.pw-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  position: relative;
+}
+/* 뷰어 뿌리(.pvp-root 는 높이 100%)가 채울 상자 */
+.pw-pane {
+  position: absolute;
+  inset: 0;
+}
+.pw-msg {
+  padding: 32px 24px;
+  color: var(--ink-2);
+  text-align: center;
+}

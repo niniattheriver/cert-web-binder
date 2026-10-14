@@ -1,0 +1,105 @@
+/* 그림 판본 뷰어 페인: ImageViewerPane.tsx
+   바깥 틀, 매핑 테두리와 안내줄, 배지, 팝오버, 토스트는 styles.css 의 pvp-* 규칙을, 확대/축소 줄은 zoombar.css 를 그대로 쓴다
+   (PDF, Office 뷰어와 같은 모양). 여기서는 스크롤 상자, 그림 틀, 확인 필요 목록만 정한다. 색은 styles.css :root 의 토큰만 쓴다. */
+
+/* 스크롤 상자: 페인을 꽉 채운다 (매핑 모드에서는 안내줄 아래에서 시작: 인라인 style 의 top) */
+.ivp-scroll {
+  position: absolute;
+  inset: 0;
+  overflow: auto;
+  background: var(--panel);
+  scrollbar-color: var(--rule) var(--panel);
+}
+
+/* 그림이 칸보다 좁으면 가운데, 넓으면(원래 크기) 왼쪽부터 놓여 스크롤로 다 볼 수 있다(margin-inline: auto) */
+.ivp-content {
+  box-sizing: border-box;
+  min-height: 100%;
+  padding: 12px 16px 24px;
+}
+
+.ivp-figure {
+  position: relative;
+  width: fit-content;
+  max-width: 100%;
+  margin: 0 auto;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  line-height: 0; /* 그림 아래 글줄 틈 없애기 */
+}
+.ivp-figure img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  user-select: none;
+}
+.ivp-figure.is-actual,
+.ivp-figure.is-actual img {
+  max-width: none;
+}
+/* 폭 맞춤: 그림 틀이 칸 폭을 다 쓰고 그림은 그 폭에 맞춘다(작은 그림은 키운다) */
+.ivp-figure.is-fit {
+  box-sizing: border-box;
+  width: 100%;
+}
+/* 근거로 연결된 그림: 다른 뷰어의 하이라이트 밑줄과 같은 색 테두리 (색은 인라인 --ivp-line) */
+.ivp-figure.is-linked {
+  box-shadow: 0 0 0 3px var(--ivp-line, #d97706);
+}
+.ivp-figure .pvp-badge {
+  line-height: 1.5;
+}
+.ivp-loading {
+  padding: 2rem;
+  line-height: 1.5;
+  color: var(--ink-2);
+}
+
+/* 확인 필요 근거: 그림 아래 카드 */
+.ivp-review {
+  max-width: 720px;
+  margin: 16px auto 0;
+  background: var(--surface);
+  border: 1px solid var(--ink);
+  border-radius: var(--radius, 6px);
+  padding: 10px 14px;
+}
+.ivp-review-title {
+  font-size: var(--fs-meta);
+  font-weight: 600;
+  color: var(--ink);
+}
+.ivp-review-list {
+  list-style: none;
+  margin: 6px 0 0;
+  padding: 0;
+}
+.ivp-review-item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+  padding: 6px 0;
+  border-top: 1px solid var(--line);
+}
+.ivp-review-qs {
+  font-weight: 600;
+  font-size: var(--fs-meta);
+}
+.ivp-review-quote {
+  flex: 1 1 16rem;
+  color: var(--ink-2);
+  font-size: var(--fs-caption);
+}
+
+/* 매핑 안내줄: 문구와 [이 그림 연결] 단추를 한 줄에 */
+.ivp-mapbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+}
+.ivp-mapbar-hint {
+  color: var(--ink-2);
+  font-weight: 400;
+}

@@ -1,0 +1,15 @@
+{
+  "name": "demo-pdf-gen",
+  "version": "1.0.0",
+  "private": true,
+  "description": "웹 바인더 데모용 가상(무저작권) 한국어 지침서/문항 PDF 생성기 — 독립 패키지(루트 워크스페이스 미포함)",
+  "type": "module",
+  "scripts": {
+    "generate": "node generate.mjs",
+    "verify": "node verify.mjs"
+  },
+  "dependencies": {
+    "pdfkit": "^0.17.1",
+    "pdfjs-dist": "^4.10.38"
+  }
+}

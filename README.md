@@ -1,0 +1,258 @@
+# 우수검사실 신임인증 웹 바인더 (Cert Web Binder)
+
+신임인증 심사 문항의 **근거자료를 문항 단위로 묶어 관리**하는 **내부망 설치형 웹 애플리케이션**입니다.
+기관이 서버 PC 한 대에 설치하면 직원들은 각자 PC의 브라우저로 접속해 함께 씁니다.
+종이 바인더와 흩어진 파일을 대체하여, 심사위원이 문항 번호만으로 **3초 안에** 문항 본문·채점·
+근거(근거자료 인용, 자유형식 문서)를 찾아볼 수 있게 합니다. 근거자료는 PDF 뿐 아니라 Word(docx, doc),
+Excel(xlsx, xls), PowerPoint(pptx), 한글(hwpx, hwp), 텍스트(txt, csv, tsv, md) 파일도 그대로 올려 미리 보고, 검색하고,
+문항과 연결합니다. 사진, 스캔한 그림(png, jpg, gif, webp, bmp)도 올려 그림 전체를 근거로 연결합니다(그림 속 글자는
+읽지 않습니다).
+
+![웹 바인더 한눈에 보기. A. 준비물: 배포 zip, 서버 PC, 문항 PDF, 근거자료 파일(PDF, Word, Excel, PowerPoint, 한글, 텍스트, 그림). B. 설치와 구조: 서버 PC 한 대와 직원 PC 브라우저. C. 사용 순서: 계정 준비부터 다음 해까지.](docs/img/overview.png)
+
+> **English summary.** Cert Web Binder is a self-hosted web application for internal networks that replaces the
+> paper binders used to prepare for certification audits. Staff look up any checklist item by its
+> number and instantly see the item text, its score, and its supporting evidence — verbatim quotes
+> anchored into guideline documents (PDF, Word, Excel, PowerPoint, HWP and HWPX, text, including the legacy
+> binary .doc, .xls and .hwp formats) plus free‑form rich
+> documents. Photos and scanned figures (PNG, JPEG, GIF, WebP, BMP) are linked as whole images, and the
+> evidence viewer zooms (toolbar, Ctrl+wheel, Ctrl+drag) and can be popped out into its own window for a
+> second monitor. When next year's revised checklist
+> arrives, answers and evidence links carry over automatically. The checklist itself is copyrighted by its
+> publisher (진단검사의학재단) and is not bundled: each laboratory imports the PDFs it received. It runs entirely on an internal
+> network with no internet or CDN access: one Node process serves both the React SPA and the API,
+> storing everything in a single SQLite database and a content‑addressed file store. Built with
+> Express, better‑sqlite3 (WAL + FTS5), React/Vite, pdf.js, Tiptap, and ExcelJS. MIT‑licensed;
+> all dependencies shipped in the release are permissive (MIT, Apache, BSD, ISC; fonts under OFL).
+
+## 웹 바인더가 하는 일
+
+**1. 문항 자동 등록** — 인증기관이 배포한 심사점검표 PDF를 올리면 문항 번호·본문·배점·유형
+(핵심/필요/기본)·목차(대분류→소분류)·개정 내역까지 자동으로 읽혀 등록됩니다. 실제 2026년
+문항집 14부(1,662문항)로 검증했고, 사람이 따로 확인한 것은 1건이었습니다. 분야별로 담당자가
+자기 분야 PDF만 따로 올려도 같은 연도로 합쳐집니다.
+
+**2. 드래그로 근거 연결**: 문항 화면은 [문항 목차 | 문항, 점수, 근거 | 근거자료 뷰어]의 3분할입니다.
+**[+ 근거자료 연결]** 창에서 올려 둔 근거자료를 고르면 오른쪽 뷰어에 '연결 중'으로 열리고, 본문을 마우스로
+드래그해 **[연결]** 단추를 누르면(그림 자료는 **[이 그림 연결]**) 그 자리가 문항의 근거가 됩니다. 연결 중에는 드래그할
+때마다 [연결]이 뜨고 Esc 는 고른 부분만 지웁니다. 다른 자료를 연결하려면 칸 위 **[자료 닫기]** 단추를 누른 뒤 다시
+고릅니다. 근거 칩 ①②③을 누르면 뷰어가 해당 위치로 이동해 하이라이트를 보여 줍니다. 문항 내용과 비슷한
+근거자료 페이지를 자동으로 찾아 주는 **근거 추천**도 있습니다(연결 확정은 항상 사람이 합니다). 같은 창의
+**[내 PC에서 선택]** 단추로 내 PC의 파일 여러 개를 바로 첨부하고, 링크와
+**자유형식 문서**(표와 그림을 넣는 편집기)도 같은 근거 카드에 붙일 수 있습니다. 첨부는 이름을 누르면
+내려받지 않고 창에서 미리 봅니다. 첨부한 파일은 근거자료 메뉴에도 문항의 연도로 함께 올라갑니다(같은 이름,
+같은 형식의 근거자료가 이미 있으면 그 자료는 그대로 둠). 근거자료 뷰어는 위쪽 단추([−], [+], [폭 맞춤])나 **Ctrl+휠**, **Ctrl+드래그**로
+확대, 축소하고, **[창 분리]** 단추를 누르면 근거자료만 새 창으로 떼어 듀얼 모니터의 다른 화면에 둘 수 있습니다.
+
+**3. 채점** — 문항별로 단순(예/아니오, 문항에 따라 해당없음) · 합산(세부 항목별 점수의 합) ·
+자동(기관 지표를 넣으면 구간표로 계산) 세 방식을 지원합니다. "예"를 고르면 만점이 자동 입력되되
+사람이 확정하기 전까지 **미확정 표시**가 남습니다.
+
+**4. 근거자료 관리와 개정 자동 이관**: 근거자료 메뉴의 **[내 PC에서 선택]** 단추나 끌어다 놓기로
+검사지침서, 장비 매뉴얼, SOP 같은 기관 문서를 수백 부라도 한꺼번에 등록합니다(파일명이 곧 제목, 같은 제목과
+같은 계열 형식이면 새 버전: doc 와 docx 는 같은 계열). 올린 자료는 탐색기처럼 한 줄에 하나씩 이름, 업로드 날짜,
+유형, 크기, 버전, 연결 문항 수로 보이고, 열 이름을 눌러 정렬하거나 **[카드]** 보기로 바꿉니다.
+예전 형식(doc, xls, hwp)도 변환 없이 올려 미리 보고
+연결합니다. PowerPoint 97~2003(ppt), Word 95 이전(doc), Excel 95 이전(xls), 한글 97 이전(hwp 3.0)과 배포용 hwp 는
+받지 않으니 원래 프로그램에서 새 형식이나 PDF 로 저장해 올리고, 암호나 문서 보안(DRM)이 걸린 파일은 해제한 뒤
+올립니다. 그림 파일은 글자를 읽지 않아 본문 검색에는 걸리지 않고, 뷰어의 **[이 그림 연결]** 단추로 그림 전체를 근거로
+잇습니다. 아이폰 사진(HEIC), TIFF, SVG 는 JPG 나 PNG 로 바꿔 올립니다.
+근거자료가 개정되어 새 버전을 올리면 **기존 근거 연결을 새 버전에서 자동으로 찾아 옮기고**,
+문장이 바뀌어 자동으로 옮기지 못한 것만 '확인 필요' 목록에 남깁니다. 시스템이 몰래 틀린 위치로
+옮기는 일은 없습니다. 두 버전의 달라진 문장만 모아 보는 **버전 비교**도 있습니다.
+
+**5. 해가 바뀌면 — 연차 이월** — 홈의 [+ 새 문항 PDF 가져오기]에서 가져올 연도를 새해로 골라 개정 문항집 PDF를
+올리면, **작년 서술 답변·근거 연결·첨부를 그대로 물려받고, 예/아니오 선택과 점수는 새 심사에 맞춰 초기화**됩니다.
+가져올 PDF 는 끌어다 놓거나 여러 번에 나눠 골라 목록에 모읍니다. 실행 전 미리보기가 몇 건이 이월되는지 보여 주고, 내용이 바뀐 문항은 '변경', 새 문항은 '신규'
+표시가 붙으며, 문항 화면에서 전년도 문항과 나란히 비교할 수 있습니다. 근거자료도 연도 선택(2025~2099년)으로
+연도별로 관리됩니다.
+
+**6. 찾기** — 통합 검색창(Ctrl+K) 하나로 문항 번호(부분 입력·구분자 생략 허용)·문항 내용·
+**근거자료 본문**(PDF, Word, Excel, PowerPoint, 한글, 텍스트)까지 한 번에 찾습니다. 한국어 부분 일치라 단어 일부만 입력해도 됩니다.
+검색 결과의 위치는 PDF 는 'p.N', Excel 과 csv, tsv 는 시트 이름, PowerPoint 는 '슬라이드 N', 한글과 txt, md,
+쪽 정보가 없는 Word 는 '구간 N' 으로 보입니다.
+
+**7. 점검**: **확인 필요** 메뉴에 사람이 다시 봐야 할 것(근거자료 개정으로 끊긴 근거 연결,
+재계산이 필요한 자동 채점, 개정된 문항의 채점 재확인)이 자동으로 모입니다. 연도 화면의 분야
+카드에는 **근거 연결 전**, **재확인 필요** 같은 손볼 문항 수가 바로 표시되고, 누르면 그 문항만
+걸러 보여 줍니다.
+
+**8. 산출물**: 감점, 지적사항, 자동 입력 미확정 문항을 모은 결과 요약, 분야별/전체 엑셀 내보내기(준비도 요약 시트
+포함), A4 종이 바인더 형식의 인쇄 화면.
+
+**9. 함께, 안전하게** — 서버 한 대에 설치하면 같은 내부망의 여러 PC에서 브라우저로 동시에
+접속해 함께 작업합니다(계정 역할: 관리자/편집/열람, 같은 문항 동시 수정은 충돌 감지).
+모든 변경은 이력이 남고, 삭제는 복구 가능한 방식이며, 매일 자동 백업됩니다. 올린 문서는
+누가 올리든 서버 PC의 `data` 폴더 한 곳에만 저장되어 로그인한 계정이 모두 함께 보고, 외부로 나가는 경로가
+없습니다(사용 안내의 '올린 파일은 어디에 저장되나요?'). 자유형식 문서에도 바깥 주소의 그림은 넣지 않아(붙여 넣으면
+빠지고 안내가 뜸), 문서를 열 때 외부로 요청이 나가지 않습니다. 로그인 후 **사용 안내**
+메뉴(`/guide`)에 화면별 설명이 내장되어 있습니다.
+
+## 심사점검표 저작권
+
+「우수검사실 신임인증 심사점검표」(인증 문항)의 저작권은 재단법인 진단검사의학재단에 있습니다. 재단은 사전 서면
+동의 없는 전재, 복제, 배포와 2차적 저작물 작성, 상업적 사용을 제한하고, 심사점검표를 소프트웨어나 상업적 서비스에
+싣는 업체는 저작물 이용 계약을 맺도록 안내하고 있습니다. 그래서 웹 바인더는 **문항을 동봉하거나 배포하지 않으며**,
+각 기관이 받은 점검표 PDF를 기관 안의 서버에 직접 등록해 신임인증 준비에만 쓰도록 설계했습니다. 가져온 문항과 문항이
+담긴 엑셀 내보내기, 인쇄본도 기관 밖으로 배포하지 마세요. 자세한 내용은 앱의 **사용 안내 > 심사점검표 저작권**과
+재단의 공지를 따르세요.
+
+## 설치 — 내려받아 실행하기
+
+**따로 설치할 프로그램이 없습니다.** 실행에 필요한 엔진(Node.js)까지 zip 안에 들어 있어서,
+**zip 내려받기 → 압축 풀기 → 더블클릭** 세 동작이면 끝납니다.
+
+1. 이 저장소의 **[Releases](https://github.com/niniattheriver/cert-web-binder/releases/latest)** 페이지에서
+   Windows는 `…win32-x64.zip`, Linux는 `…linux-x64.zip` 파일을 내려받습니다.
+   (지원 OS: **Windows x64 · Linux x64** — macOS용 배포본은 없습니다.)
+
+   ![Releases — Windows zip](docs/img/install-release.png)
+
+2. zip 파일을 원하는 폴더에 **"모두 압축 풀기"로 압축 해제**하고, 폴더 안의 **`start-windows.bat` 를 더블클릭**합니다.
+   준비가 끝나면 브라우저가 자동으로 열립니다. (Linux는 터미널에서 `sh start-linux.sh` 실행 후
+   브라우저에서 `http://localhost:8080` 접속)
+
+   > **처음 실행하는 PC에서는 1~3분 걸릴 수 있습니다** — Windows 보안 검사가 동봉된 실행
+   > 엔진을 처음 확인하는 시간입니다. 화면이 늦게 떠도 고장이 아니니 검은 창을 닫지 말고
+   > 기다려 주세요(두 번째 실행부터는 몇 초 만에 뜹니다).
+
+3. 로그인 화면이 뜨면 아이디는 **`admin`**, 비밀번호는 **맨 처음 실행 때 자동 생성된 초기
+   비밀번호**입니다. 초기 비밀번호는 첫 실행 시 검은 실행 창에 1회 표시되고, 같은 내용이
+   압축을 푼 폴더의 **`data\initial-admin-password.txt`** 파일에 저장됩니다 — 창에서 못
+   봤다면 이 파일을 메모장으로 열어 확인하세요(로그인 화면에도 같은 안내가 표시됩니다).
+   로그인한 뒤 비밀번호를 바꾸면 이 파일은 자동으로 삭제됩니다.
+
+   > 다른 PC에서도 접속하게 하려면, 첫 실행 때 뜨는 Windows 방화벽 창에서 **[액세스 허용]** 단추를
+   > 눌러 주세요(자세한 내용은 [docs/INSTALL.md](docs/INSTALL.md)의 방화벽 절 참고).
+
+4. 동료들은 설치 없이 각자 PC의 브라우저에서 `http://서버PC주소:8080` 으로 접속하면 같은 화면을 함께 씁니다.
+   - **서버PC주소**란 프로그램을 실행해 둔 PC의 내부망 IP 주소(점으로 구분된 숫자)입니다.
+     예를 들어 서버 PC의 주소가 `192.168.0.23` 이라면, 동료는 자기 PC 브라우저 주소창에
+     `http://192.168.0.23:8080` 을 입력하면 됩니다.
+   - **주소 확인 방법** — 프로그램을 실행해 둔 PC에서: 시작 메뉴에 `cmd` 를 입력해
+     **명령 프롬프트**를 열고, `ipconfig` 라고 입력한 뒤 Enter를 누릅니다. 결과 중
+     **"IPv4 주소"** 줄에 나오는 숫자(예: `192.168.0.23`)가 서버PC주소입니다.
+     (Linux 서버라면 터미널에서 `hostname -I` 로 확인합니다.)
+
+> 잘 안 될 때: 브라우저가 안 열리면 주소창에 `http://localhost:8080` 을 직접 입력하세요.
+> 실행 창(검은 창)을 닫으면 프로그램도 종료됩니다 — 부팅 시 자동 시작·백업 등 상시 운영 설정은
+> [docs/INSTALL.md](docs/INSTALL.md)를 참고하세요.
+
+### 새 버전으로 바꾸기
+
+- **압축을 풀어 실행해 온 경우**(서비스로 등록하지 않음): 실행 창을 닫고, 새 zip 을 다른 폴더에 풉니다. 이전 폴더의
+  `data` 폴더와 `config.json` 을 새 폴더로 복사한 뒤 새 폴더의 `start-windows.bat`(Linux 는 `start-linux.sh`)를 실행합니다.
+  이전 폴더는 새 버전을 확인할 때까지 지우지 말고 두세요. 문제가 있으면 새 폴더의 창을 닫고 이전 폴더에서 다시 실행하면
+  바꾸기 전 상태로 돌아갑니다.
+- **서비스로 등록해 운영하는 경우**: 업그레이드 스크립트를 씁니다. 바꾸기 전 파일과 DB 사본을 남기고, 문제가 있으면
+  되돌립니다([docs/INSTALL.md](docs/INSTALL.md) 업그레이드 절).
+- 어느 경우든 바꾸기 전에 운영 점검 화면의 **[전체 백업(원본 파일 포함)]** 을 받아 두세요.
+
+### 개발·데모 실행 (소스에서, 5분)
+
+선행조건: **Node LTS(20.19+ 또는 22.12+)** 하나. (릴리스 zip과 달리 소스 실행에는 Node 설치가
+필요합니다 — [nodejs.org](https://nodejs.org/ko) 초록 버튼으로 설치. 화면 안내:
+[docs/img/install-nodejs.png](docs/img/install-nodejs.png) ·
+[docs/img/install-nodejs-msi.png](docs/img/install-nodejs-msi.png))
+
+```bash
+npm ci                 # 의존성 설치 (워크스페이스: server + web)
+npm run seed:demo      # 데모 데이터 시드 → data/ (가상 기관, 문항 55개, 근거자료 6부(PDF 2, Word, Excel, csv, 그림), 매핑, 채점)
+npm run dev            # 서버(8080) + 웹(5173) 동시 기동
+```
+
+브라우저에서 **http://localhost:5173** → 로그인 **admin / day1pass**.
+
+데모에는 실데이터가 전혀 없습니다 — 자체 제작한 가상 분야 2개(개인정보 보호 30문항 · 정보보안
+25문항), 가상 지침서 PDF 2부(`seed/demo-pdfs/README.md`)와 시드 때 만드는 가상 Office 지침서 3부(Word, Excel,
+csv: `seed/office-fixtures.ts`), 글자 없는 망 분리 구성도 그림 1장(`seed/image-fixtures.ts`)이 들어 있습니다.
+
+> 데모와 저장소에는 실제 심사점검표 문항이 들어 있지 않습니다(위 [심사점검표 저작권](#심사점검표-저작권) 참고).
+
+**연차 이월 직접 재현** — `seed/demo-pdfs/2027/`에 가상 문항·지침서의 **2027년 개정판**이
+동봉되어 있습니다. 가져오기 화면에서 연도를 2027로 고르고 `2027_50.pdf`·`2027_60.pdf`라는
+이름으로 올리면(분야 코드는 파일명에서 읽으므로) 답변과 근거가 이월되는 과정을, 근거자료 화면에서
+2027 개정판을 새 버전으로 올리면 근거 자동 이관과 '확인 필요' 분류를 직접 볼 수 있습니다.
+
+검증:
+
+```bash
+npm test                       # 서버 단위 테스트 (vitest)
+npm run typecheck              # server + web 타입체크
+npm run build                  # web 프로덕션 빌드
+npx playwright test            # E2E (데모 시드 + dev 서버 기동 상태에서)
+```
+
+## 아키텍처
+
+```
+브라우저(React SPA) ──┐
+                      ├─ 단일 Node 프로세스 (프로덕션: 같은 포트로 SPA+API)
+관리 API / 파일 ──────┘        │
+                               ├─ SQLite (WAL) : app.db  ── FTS5 trigram, 불변 버전·근거 연결 모델
+                               └─ 파일 저장소   : data/files/ (내용주소 sha256, 불변)
+```
+
+- **오프라인 전제**: 런타임에 인터넷과 CDN 접근 없음. pdf.js의 cMaps와 표준폰트, 화면 글꼴(Pretendard,
+  SIL OFL 1.1)은 앱 정적 경로에 동봉.
+- **Office 문서**: 서버가 업로드 때 원본을 한 번 해석해 검색용 쪽 글자와 화면용 렌더 모델(JSON)을 함께 만든다.
+  브라우저는 원본 파일을 해석하지 않고 그 JSON 만 그린다. 새 의존성 없음(내장 ZIP 리더, 자체 XML 트리, 기존 ExcelJS).
+  설계는 [`설계서.md`](설계서.md) §3.5.
+- **문서 해석 격리**: Office, 텍스트 파일 해석은 작업 스레드(worker_threads)에서 시간 2분, 메모리 2GB 상한을 두고 돈다.
+  큰 파일이나 손상된 파일이 있어도 서버의 다른 요청은 멈추지 않고, 상한을 넘긴 파일만 안내와 함께 거부된다.
+- **불변 모델**: 근거자료는 버전(version) 단위로 보관하고, 문항↔근거 연결은 인용문 기반 위치
+  기록으로 고정. 개정 시 정확 일치만 자동 이관, 나머지는 확인 필요 목록(조용한 오이관 없음).
+- **하드삭제 없음**: 도메인 데이터는 soft delete(`deleted_at`) + 변경이력(change_log).
+- 상세 설계는 [`설계서.md`](설계서.md)(사양 원천) 참조.
+
+## 기술 스택
+
+| 영역 | 사용 기술 |
+|------|-----------|
+| 런타임 | Node LTS(20/22) · TypeScript(tsx 실행) |
+| 서버 | Express · better‑sqlite3(SQLite WAL + FTS5 trigram) · pdfjs‑dist(Node legacy) · ExcelJS · express‑session · bcryptjs · zod · Office 문서 해석(자체 구현: docx, doc, xls, pptx, hwpx, hwp, 그리고 ExcelJS 위에 보정한 xlsx) |
+| 웹 | React 18 · Vite · react‑router · pdfjs‑dist + react‑pdf‑highlighter‑extended · Tiptap 3 · @tanstack/react‑virtual · diff(버전 비교) |
+| 근사매칭 | approx‑string‑match (개정 자동 이관) |
+| 인쇄 | 브라우저 `@media print` CSS |
+| 테스트 | vitest(서버) · Playwright(E2E) |
+
+배포물에 들어가는 의존성은 모두 permissive 라이선스입니다(MIT, Apache-2.0, BSD, ISC 등, 폰트는 SIL OFL 1.1). 빌드 도구 가운데
+lightningcss 는 MPL-2.0 이며 배포물에는 들어가지 않습니다. 목록은 [NOTICE](NOTICE).
+
+구형 형식 해석은 외부 라이브러리 없이 공개 문서를 보고 직접 구현했습니다. 본 제품은 한컴의 HWP 문서 파일(.hwp) 공개 문서를 참고하여 개발하였습니다.
+구형 Word(doc)와 Excel(xls), OLE 복합 문서는 Microsoft 공개 사양([MS-DOC], [MS-XLS], [MS-CFB], [MS-OLEPS], [MS-OSHARED])을 참고했습니다.
+
+## 저장소 구조
+
+```
+server/   Express API · DB 마이그레이션 · PDF 문항 판독/추출 · Office 문서 해석(office/) · 잡(백업·무결성) · 내보내기
+web/      React SPA (pages/ · components/)
+seed/     데모 시드 + 가상 지침서/문항 PDF(자체 생성·무저작권, 2026판+2027 개정판)
+docs/     INSTALL.md(설치) · 운영런북.md(운영)
+packaging/ 릴리스 스크립트 · systemd/WinSW · Dockerfile · 업그레이드 스크립트
+설계서.md  사양 원천(단일 소스)
+```
+
+- `data/`(런타임 상태)와 `_로컬자료/`(실물 자료)는 **git에 포함하지 않습니다**(공개 저장소).
+
+## 릴리스 (설치본)
+
+`v*` 태그를 푸시하면 GitHub Actions가 테스트→빌드→패키징을 거쳐 **Linux/Windows 배포 zip**을
+Releases에 자동 첨부합니다. zip은 완전 오프라인 실행 가능하며 **Node 실행 엔진까지 동봉**되어
+대상 서버에 아무것도 설치할 필요가 없습니다. 데모 데이터가 필요하면 저장소를 클론해 위 "5분 설치"를 이용하세요.
+
+## 문서
+
+- 설치(내부망 오프라인): [docs/INSTALL.md](docs/INSTALL.md)
+- 운영 런북(재시작·백업·사용자·무결성·운영 점검 화면 사용법·인증심사(실사) 전날 체크리스트): [docs/운영런북.md](docs/운영런북.md)
+- 배포·서비스·릴리스: [packaging/README.md](packaging/README.md)
+- 앱 내 사용 안내: 로그인 후 상단 **사용 안내** 메뉴(`/guide`)
+
+## 개발 노트
+
+개발 과정에서 AI 코딩 도구(Anthropic Claude)를 활용했습니다. 설계·요구 정의·검증과 최종
+확인은 출품자가 수행했습니다.
+
+## 라이선스
+
+[MIT](LICENSE) © 2026 인증 근거자료 웹 바인더 기여자. 서드파티 고지는 [NOTICE](NOTICE) 참조.
